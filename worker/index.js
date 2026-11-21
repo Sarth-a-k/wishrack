@@ -4,7 +4,7 @@
 const MAX_ITEM_BYTES = 200_000;
 const MAX_IMAGE_BYTES = 1_500_000;   // stored photos (the app shrinks them first)
 const MAX_READ_BYTES = 7_000_000;    // screenshots sent for reading
-const CHECKS_PER_RUN = 20;           // free plan allows 50 outbound requests per run
+const CHECKS_PER_RUN = 15;           // free plan allows 50 outbound requests per run; an item can need 3 (product JSON, page, photo)
 const UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36";
 
 class HttpError extends Error {
@@ -381,9 +381,21 @@ async function checkOne(env, item) {
     }
     if (found.mrp != null) next.mrp = found.mrp;
     next.checkError = "";
-  } else {
-    next.checkError = item.url ? "The store page couldn't be read." : "No store link saved.";
   }
+  // Items saved from a bare link have no photo; borrow the store's own product photo when the page names one.
+  if (found && found.image && !item.imageId) {
+    try {
+      const r = await fetch(checkUrl(found.image), { headers: { "user-agent": UA, accept: "image/webp,image/jpeg,image/*" }, signal: AbortSignal.timeout(12000) });
+      const type = (r.headers.get("content-type") || "").split(";")[0];
+      const buf = r.ok && /^image\/(jpeg|png|webp)$/.test(type) ? await r.arrayBuffer() : null;
+      if (buf && buf.byteLength && buf.byteLength <= MAX_IMAGE_BYTES) {
+        const imageId = crypto.randomUUID().replace(/-/g, "");
+        await env.DB.prepare("INSERT INTO images (id, mime, data, created_at) VALUES (?1, ?2, ?3, ?4)").bind(imageId, type, buf, now).run();
+        next.imageId = imageId;
+      }
+    } catch { /* keep the item without a photo */ }
+  }
+  if (!found || found.price == null) next.checkError = !item.url ? "No store link saved." : found && (found.title || found.image) ? "The store page doesn't show its price to Wishrack. Update it by hand if it changed." : "The store page couldn't be read.";
   const { id, ...data } = next;
   await env.DB.prepare("UPDATE items SET data = ?1, updated_at = ?2 WHERE id = ?3").bind(JSON.stringify(data), now, id).run();
   return next;

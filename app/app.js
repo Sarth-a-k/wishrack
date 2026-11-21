@@ -276,8 +276,10 @@
   }
 
   // ------------------------------------------------------------ render: tally, toolbar, grid
+  // Items the Android app saved without a readable price wait in the inbox until accepted.
+  const onRack = () => state.items.filter((x) => !x.inbox);
   function visibleItems() {
-    let list = state.items.slice();
+    let list = onRack();
     if (state.store !== "all") list = list.filter((x) => (x.store || "Other") === state.store);
     const p = (x) => x.price == null ? Infinity : x.price;
     if (state.sort === "low") list.sort((a, b) => p(a) - p(b));
@@ -315,8 +317,20 @@
     else if (recentDrop(it)) a.append(h("span", { class: "flag fell" }, icon("down", 14), money(it.previousPrice - it.price) + " drop"));
     return a;
   }
+  function card(it) {
+    return h("article", { class: "card" + (it.bought ? " is-bought" : "") },
+      photo(it),
+      h("button", { class: "info", type: "button", onclick: () => openSheet(it.id), "aria-label": "Details for " + (it.title || "product") },
+        h("span", { class: "meta", text: [it.store, it.colour, it.size].filter(Boolean).join(" · ") || "Saved " + daysAgo(it.addedAt) }),
+        h("span", { class: "title", text: it.title || "Untitled product" }),
+        priceLine(it)));
+  }
   function render() {
-    const live = state.items.filter((x) => !x.bought);
+    const waiting = state.items.filter((x) => x.inbox).sort((a, b) => (b.addedAt || 0) - (a.addedAt || 0));
+    $("#inbox").hidden = !waiting.length;
+    $("#inboxTitle").textContent = waiting.length === 1 ? "1 waiting for you" : waiting.length + " waiting for you";
+    $("#inboxGrid").replaceChildren(...waiting.map(card));
+    const live = onRack().filter((x) => !x.bought);
     const total = live.reduce((s, x) => s + (x.price || 0), 0);
     $("#tally").replaceChildren(
       h("span", { class: "tally-n", text: live.length + " to buy" }),
@@ -342,16 +356,11 @@
     grid.removeAttribute("aria-busy");
     if (!list.length) {
       grid.replaceChildren(h("div", { class: "empty" },
-        h("h3", { text: state.items.length ? "Nothing from " + state.store + " yet" : "Your rack is empty" }),
-        h("p", { text: state.items.length ? "Pick All stores to see everything." : "Next time something catches your eye on Instagram or a store app, share the screenshot to Wishrack, or paste its link above. It lands here with its photo and price." })));
+        h("h3", { text: onRack().length ? "Nothing from " + state.store + " yet" : "Your rack is empty" }),
+        h("p", { text: onRack().length ? "Pick All stores to see everything." : "Next time something catches your eye on Instagram or a store app, share the screenshot to Wishrack, or paste its link above. It lands here with its photo and price." })));
       return;
     }
-    grid.replaceChildren(...list.map((it) => h("article", { class: "card" + (it.bought ? " is-bought" : "") },
-      photo(it),
-      h("button", { class: "info", type: "button", onclick: () => openSheet(it.id), "aria-label": "Details for " + (it.title || "product") },
-        h("span", { class: "meta", text: [it.store, it.colour, it.size].filter(Boolean).join(" · ") || "Saved " + daysAgo(it.addedAt) }),
-        h("span", { class: "title", text: it.title || "Untitled product" }),
-        priceLine(it)))));
+    grid.replaceChildren(...list.map(card));
     if (state.openId === "settings") renderSettings();
     else if (state.openId) renderSheet();
   }
@@ -539,7 +548,7 @@
   function showSheet(...kids) {
     const sheet = $("#sheet");
     sheet.hidden = false; $("#shade").hidden = false; document.body.classList.add("sheet-open");
-    sheet.replaceChildren(...kids);
+    sheet.replaceChildren(...kids.filter(Boolean)); // native replaceChildren would print a skipped (null) section as "null"
   }
   function sheetTop(title) {
     return h("div", { class: "sheet-top" + (title ? "" : " bare") }, h("span", { class: "grab", "aria-hidden": "true" }), title ? h("h2", { id: "sheetTitle", text: title }) : null,
@@ -580,6 +589,15 @@
           h("p", { class: "hint", text: [it.colour, it.size ? "size " + it.size : "", "saved " + daysAgo(it.addedAt)].filter(Boolean).join(" · ") }),
           h("a", { class: "btn primary", href: storeLink(it), target: "_blank", rel: "noopener noreferrer" }, it.url ? "Go to " + (it.store || "store") : "Find it online", icon("out", 16)),
           h("label", { class: "linkish", for: "ed-photo" }, imgSrc(it) ? "Replace photo" : "Add a photo"), photoIn)),
+      it.inbox ? h("section", { class: "section inbox-step" },
+        h("h4", { text: "Waiting for you" }),
+        h("p", { class: "hint", text: "Saved from a screenshot, but " + (it.price == null ? "the price couldn't be read" : "some details are missing") + ". Fill in the details below, then add it to your rack." }),
+        h("div", { class: "row" },
+          h("button", { class: "btn primary small", type: "button", onclick: async (e) => {
+            const b = e.currentTarget; b.disabled = true;
+            try { await putItem({ ...draft, url: isUrl(draft.url) ? String(draft.url).trim() : "", inbox: false }); sheetMsg("Added to your rack.", false); }
+            catch (err) { sheetMsg(err.message, true); b.disabled = false; }
+          } }, icon("check", 16), "Add to rack"))) : null,
       h("section", { class: "section" },
         h("h4", { text: "Price over time" }),
         historyChart(it) || h("p", { class: "hint", text: "No price saved yet." }),
@@ -637,9 +655,17 @@
             : ai === false ? "No Gemini key is set, so this phone reads screenshots itself. It finds prices but often misses names. Add GEMINI_API_KEY to the Worker for better reading."
             : "Checking…"),
         h("p", { class: "hint", text: "Google may use free-tier screenshots to improve its models." })),
+      // Only inside the Wishrack Android app, which exposes window.WishrackAndroid.
+      window.WishrackAndroid ? h("section", { class: "section" },
+        h("h4", { text: "Screenshots on this phone" }),
+        h("label", { class: "check" },
+          h("input", { type: "checkbox", id: "autoShots", checked: !!window.WishrackAndroid.isAuto(), onchange: (e) => { window.WishrackAndroid.setAuto(e.target.checked); renderSettings(); } }),
+          h("span", { text: "Save new screenshots automatically" })),
+        h("p", { class: "hint", text: "Clothes and shoes go straight onto your rack; ones without a readable price wait above your rack. Everything else is ignored." }),
+        h("p", { class: "setting-line", text: String(window.WishrackAndroid.status() || "") })) : null,
       h("section", { class: "section" },
         h("h4", { text: "Price checks" }),
-        h("p", { class: "setting-line", text: "Every morning at 8, Wishrack re-checks about 20 saved store pages, oldest first. Items marked as bought are skipped." })),
+        h("p", { class: "setting-line", text: "Every morning at 8, Wishrack re-checks about 15 saved store pages, oldest first, and fetches the store's photo for items that have none. Items marked as bought are skipped." })),
       h("section", { class: "section" },
         h("h4", { text: "Your rack" }),
         h("p", { class: "setting-line", text: state.items.length + " items saved, " + state.items.filter((x) => x.bought).length + " bought." }),

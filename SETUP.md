@@ -66,6 +66,34 @@ It prints your app's address, like `https://wishrack.<your-name>.workers.dev`. T
 
 On your laptop, open the same address in Chrome or Edge; the install icon in the address bar adds it as an app.
 
+## Android app: save screenshots automatically
+
+The Android app (`dist/Wishrack.apk`) shows your Wishrack and, in the background, picks up every new screenshot. Clothes and shoes with a readable price go straight onto your rack; ones without a price wait in **Waiting for you** at the top; everything else is ignored.
+
+1. **Put the latest version online first** (the app needs the inbox):
+
+   ```powershell
+   npm run deploy
+   ```
+
+2. **Copy `dist/Wishrack.apk` to your phone**: USB cable, Google Drive, or send it to yourself on WhatsApp/Telegram.
+3. **Install it**: tap the file on the phone. Android asks to allow installs from that app (Files, Drive, WhatsApp); allow it, then tap **Install**. Play Protect may warn that it's an unknown app; it is your own build, so choose **Install anyway**.
+4. **Connect**: open Wishrack, type your app address (`https://wishrack.<name>.workers.dev`) and your passcode, tap **Connect**.
+5. **Allow access**: choose **Allow all** for photos (with "Select photos" it can't see new screenshots) and **Allow** notifications.
+6. **Let it run in the background**: Settings → Apps → Wishrack → Battery → **Unrestricted**. Many phones (Xiaomi, Realme, Oppo, Vivo, Samsung) otherwise stop background work.
+
+From then on, take screenshots as usual. A notification says what was saved. Only screenshots taken after setup are read. You can also share any image to **Wishrack** from the gallery. In the app, **Settings → Screenshots on this phone** turns auto-save on or off and shows the last result.
+
+If you installed Wishrack from Chrome before, you can remove that copy (long-press its icon → Uninstall); the APK replaces it.
+
+**Rebuilding the APK** after changing `android/` (from this folder):
+
+```powershell
+cd android; $env:JAVA_HOME="C:\Program Files\Android\Android Studio\jbr"; .\gradlew assembleRelease; cd ..
+```
+
+The new APK is `android/app/build/outputs/apk/release/app-release.apk`. Install it over the old one; it's signed with this computer's key, so build updates on this same computer.
+
 ## Updating later
 
 After any change to the code, run `npm run deploy` again. Phones pick up the new version the next time the app opens.
