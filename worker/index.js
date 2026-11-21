@@ -90,6 +90,28 @@ async function api(req, env, url, ctx) {
     return json({ item });
   }
 
+  if (path === "/api/profile") {
+    // One row in a small key-value table; created on first use so the live database needs no migration step.
+    await env.DB.prepare("CREATE TABLE IF NOT EXISTS settings (key TEXT PRIMARY KEY, data TEXT NOT NULL, updated_at INTEGER NOT NULL)").run();
+    if (method === "GET") {
+      const row = await env.DB.prepare("SELECT data FROM settings WHERE key = 'profile'").first();
+      return json({ profile: row ? safeParse(row.data) : null });
+    }
+    if (method === "PUT") {
+      const text = await req.text();
+      if (text.length > 2000) throw new HttpError(413, "too_big", "That profile is too large to save.");
+      const body = safeParse(text);
+      if (!body || typeof body !== "object") throw new HttpError(400, "bad_json", "Send the profile as JSON.");
+      const profile = {
+        name: String(body.name ?? "").trim().slice(0, 40),
+        photoId: typeof body.photoId === "string" && /^[a-f0-9]{32}$/.test(body.photoId) ? body.photoId : null,
+      };
+      await env.DB.prepare("INSERT INTO settings (key, data, updated_at) VALUES ('profile', ?1, ?2) ON CONFLICT(key) DO UPDATE SET data = ?1, updated_at = ?2")
+        .bind(JSON.stringify(profile), Date.now()).run();
+      return json({ ok: true, profile });
+    }
+  }
+
   if (path === "/api/images" && method === "POST") return putImage(req, env);
   m = path.match(/^\/api\/images\/([a-f0-9]{32})$/);
   if (m && method === "DELETE") {
@@ -100,6 +122,7 @@ async function api(req, env, url, ctx) {
   if (path === "/api/read-image" && method === "POST") return readImage(req, env);
   if (path === "/api/read-link" && method === "GET") return json(await readLink(env, url.searchParams.get("url"), true));
   if (path === "/api/fetch-image" && method === "GET") return fetchImage(url.searchParams.get("url"));
+  if (path === "/api/shop-search" && method === "GET") return shopSearch(url.searchParams.get("site"), url.searchParams.get("q"));
 
   throw new HttpError(404, "not_found", "No such endpoint.");
 }
@@ -149,6 +172,21 @@ function checkUrl(s) {
   if (!/^https?:$/.test(u.protocol)) throw new HttpError(400, "bad_url", "Links must start with http or https.");
   if (/^(localhost|127\.|10\.|192\.168\.|169\.254\.|0\.|\[)/i.test(u.hostname)) throw new HttpError(400, "bad_url", "That link points to a private address.");
   return u.toString();
+}
+
+// Shopify's product search for a store, passed through because browsers can't read it directly (no CORS).
+// Some Shopify stores block Cloudflare; then this answers "blocked" and the Android app searches from the phone.
+async function shopSearch(site, q) {
+  site = String(site || "").toLowerCase();
+  if (!/^[a-z0-9-]+(\.[a-z0-9-]+)+$/.test(site) || !q) throw new HttpError(400, "bad_request", "Needs a store site and a product name.");
+  const u = checkUrl(`https://${site}/search/suggest.json?q=${encodeURIComponent(String(q).slice(0, 120))}&resources%5Btype%5D=product&resources%5Blimit%5D=5`);
+  let r;
+  try { r = await fetch(u, { headers: { "user-agent": UA, accept: "application/json" }, signal: AbortSignal.timeout(8000) }); }
+  catch { throw new HttpError(502, "blocked", "Couldn't reach that store."); }
+  const j = r.ok ? safeParse(await r.text()) : null;
+  const list = j?.resources?.results?.products;
+  if (!Array.isArray(list)) throw new HttpError(502, "blocked", "That store didn't answer a search.");
+  return json({ products: list.map((p) => ({ title: String(p.title || ""), url: String(p.url || "") })) });
 }
 
 // ---------------------------------------------------------------- Gemini
@@ -290,7 +328,9 @@ Only clothing and footwear count (tops, shirts, t-shirts, sweaters, jackets, coa
 If the screenshot shows no clothing or footwear product offered for sale or named by a brand or store, reply {"items":[],"skip":"<a few words on what it shows>"}.
 Otherwise find the clothes and shoes the person wants to save. Usually that is ONE main product. If the screenshot is a product grid or list, include every clothing or footwear product that shows its own name and price (at most 8), in reading order.
 ${FIELDS}
-- "box_2d": [ymin, xmin, ymax, xmax] of that product's photo, on a 0-1000 scale of the image's height and width; null if there is no photo of it
+- "site": the store's website domain, for example "wrogn.com": from the screenshot if it shows one (such as a browser address bar), otherwise the official website of that store or brand if you are sure of it, else null
+- "box_2d": [ymin, xmin, ymax, xmax] of that product's photo, on a 0-1000 scale of the image's height and width; null if there is no photo of it. Keep the whole product (and the model wearing it) but leave out the shop's interface on or around the photo: buttons such as VIEW PRODUCTS or ADD TO BAG, badges such as NEW DROP or SALE, ratings, arrows, carousel dots, icons, captions, price text and navigation bars. Cutting off some empty background is better than including any of those.
+- "overlays_2d": a list of [ymin, xmin, ymax, xmax] boxes, same scale, for any of that interface that is still inside your box_2d (a badge, arrow, dot row, icon or button drawn over the photo); [] if none
 Never guess a price. Reply with only JSON: {"items":[...]}`;
   const out = await gemini(env, [{ text: prompt }, { inline_data: { mime_type: type, data: b64(buf) } }]);
   const list = Array.isArray(out?.items) ? out.items : Array.isArray(out) ? out : [];
@@ -298,7 +338,11 @@ Never guess a price. Reply with only JSON: {"items":[...]}`;
     skip: list.length ? "" : String(out?.skip || "no clothes or shoes").slice(0, 80),
     items: list.slice(0, 8).map((o) => {
       const b = Array.isArray(o.box_2d) && o.box_2d.length === 4 && o.box_2d.every((v) => typeof v === "number") ? o.box_2d : null;
-      return { ...cleanItem(o), box: b ? [b[1] / 1000, b[0] / 1000, b[3] / 1000, b[2] / 1000] : null };
+      const site = String(o.site || "").trim().toLowerCase().replace(/^https?:\/\//, "").replace(/^www\./, "").split(/[/?#]/)[0];
+      const overlays = (Array.isArray(o.overlays_2d) ? o.overlays_2d : [])
+        .filter((v) => Array.isArray(v) && v.length === 4 && v.every((n) => typeof n === "number" && isFinite(n))).slice(0, 8)
+        .map((v) => [v[1] / 1000, v[0] / 1000, v[3] / 1000, v[2] / 1000]);
+      return { ...cleanItem(o), site: /^[a-z0-9-]+(\.[a-z0-9-]+)+$/.test(site) ? site : "", box: b ? [b[1] / 1000, b[0] / 1000, b[3] / 1000, b[2] / 1000] : null, overlays };
     }),
   });
 }

@@ -11,3 +11,9 @@ CREATE TABLE IF NOT EXISTS images (
   data       BLOB NOT NULL,      -- a small JPEG made in the app (about 50 to 150 KB)
   created_at INTEGER NOT NULL
 );
+
+CREATE TABLE IF NOT EXISTS settings (
+  key        TEXT PRIMARY KEY,   -- 'profile': the owner's name and photo id
+  data       TEXT NOT NULL,      -- JSON
+  updated_at INTEGER NOT NULL
+);

@@ -37,6 +37,7 @@
     crop: '<path d="M7 3v13.5A.5.5 0 0 0 7.5 17H21"/><path d="M3 7h13.5a.5.5 0 0 1 .5.5V21"/>',
     save: '<path d="M12 4v11M7 10l5 5 5-5"/><path d="M5 19.5h14"/>',
     search: '<circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.4-4.4"/>',
+    user: '<circle cx="12" cy="8.5" r="3.8"/><path d="M4.5 20a7.5 7.5 0 0 1 15 0"/>',
     left: '<path d="m14 6-6 6 6 6"/>',
     right: '<path d="m10 6 6 6-6 6"/>',
   };
@@ -126,6 +127,39 @@
     try { const r = await fetch(src, { credentials: "omit" }); if (r.ok) return await r.blob(); } catch {}
     try { return await (await api("/api/fetch-image?url=" + encodeURIComponent(src))).blob(); } catch { return null; }
   }
+  // Finds a screenshot's product on its Shopify store by name, for the store's clean photo, link and live price.
+  // The Android app searches from the phone (some stores block Cloudflare); elsewhere the Worker passes the search on.
+  const shopWaits = {};
+  window.__wrShop = (id, text) => { const f = shopWaits[id]; delete shopWaits[id]; if (f) f(text); };
+  async function shopSearch(site, q) {
+    const A = window.WishrackAndroid;
+    if (A && A.shopSearch) {
+      const id = newId();
+      const text = await new Promise((res) => { shopWaits[id] = res; A.shopSearch(id, site, q); setTimeout(() => window.__wrShop(id, ""), 12000); });
+      try { return (JSON.parse(text)?.resources?.results?.products || []).map((p) => ({ title: String(p.title || ""), url: String(p.url || "") })); } catch { return []; }
+    }
+    try { return (await api(`/api/shop-search?site=${encodeURIComponent(site)}&q=${encodeURIComponent(q)}`)).products || []; } catch { return []; }
+  }
+  const words = (t) => String(t || "").toLowerCase().split(/[^a-z0-9]+/).filter((w) => w.length > 1);
+  // Share of the screenshot's name (and colour) found in a store title; 1 means every word is there.
+  function nameMatch(want, colour, title) {
+    const have = new Set(words(title)), need = [...new Set([...words(want), ...words(colour)])];
+    return need.length ? need.filter((w) => have.has(w)).length / need.length : 0;
+  }
+  async function findOnStore(raw) {
+    if (!raw.site || !raw.title || isUrl(raw.url)) return null;
+    const list = await shopSearch(raw.site, raw.title);
+    let best = null, score = 0;
+    // A different colour of the same product is a different photo, so a known colour must be in the store's title.
+    const colour = words(raw.colour), sameColour = (t) => { const have = words(t); return colour.every((w) => have.includes(w)); };
+    for (const p of list) { const sc = sameColour(p.title) ? nameMatch(raw.title, "", p.title) : 0; if (sc > score) { best = p; score = sc; } }
+    if (!best || score < 0.75 || !/^\/products\//.test(best.url)) return null;
+    const url = `https://${raw.site}${best.url.split("?")[0]}`;
+    const s = await readShopify(url);
+    if (!s || !s.image) return null;
+    const blob = await fetchPhoto(s.image);
+    return blob ? { ...s, url, blob } : null;
+  }
   // Same bookkeeping as the server's daily check: record a changed price in the history.
   function withPrice(it, price, mrp) {
     const now = Date.now(), next = { ...it, lastChecked: now, checkError: "" };
@@ -180,7 +214,43 @@
     if (y1 < y0) [y0, y1] = [y1, y0];
     return x1 - x0 < 0.05 || y1 - y0 < 0.05 ? null : [x0, y0, x1, y1];
   }
-  async function cropBlob(blob, box, maxW = 900, q = 0.85) {
+  // Paints over shop buttons and badges left inside the crop, blending in the pixels around each spot.
+  // Looks clean on plain studio backgrounds; on patterned clothing it shows as a soft smudge.
+  function fillSpots(g, W, H, rects) {
+    for (const r of rects) {
+      const x0 = Math.max(0, Math.floor(r[0]) - 3), y0 = Math.max(0, Math.floor(r[1]) - 3);
+      const x1 = Math.min(W, Math.ceil(r[2]) + 3), y1 = Math.min(H, Math.ceil(r[3]) + 3);
+      const w = x1 - x0, hh = y1 - y0;
+      if (w < 2 || hh < 2 || w * hh > W * H * 0.25) continue;
+      const hasL = x0 > 0, hasR = x1 < W, hasT = y0 > 0, hasB = y1 < H;
+      if (!hasL && !hasR && !hasT && !hasB) continue;
+      const ox = Math.max(0, x0 - 1), oy = Math.max(0, y0 - 1);
+      const d = g.getImageData(ox, oy, Math.min(W, x1 + 1) - ox, Math.min(H, y1 + 1) - oy), px = d.data, DW = d.width;
+      const at = (x, y) => ((y - oy) * DW + (x - ox)) * 4;
+      for (let y = y0; y < y1; y++) for (let x = x0; x < x1; x++) {
+        const u = (x - x0 + 1) / (w + 1), v = (y - y0 + 1) / (hh + 1);
+        const sum = [0, 0, 0]; let wt = 0;
+        const add = (i, k) => { for (let c = 0; c < 3; c++) sum[c] += px[i + c] * k; wt += k; };
+        // Each side counts more the closer the pixel is to it.
+        if (hasL) add(at(x0 - 1, y), 1 / u);
+        if (hasR) add(at(x1, y), 1 / (1 - u));
+        if (hasT) add(at(x, y0 - 1), 1 / v);
+        if (hasB) add(at(x, y1), 1 / (1 - v));
+        const i = at(x, y);
+        for (let c = 0; c < 3; c++) px[i + c] = sum[c] / wt;
+        px[i + 3] = 255;
+      }
+      g.putImageData(d, ox, oy);
+    }
+  }
+  // Like normBox, but small spots (a carousel dot row) are allowed.
+  function normSpot(b) {
+    if (!Array.isArray(b) || b.length !== 4 || !b.every((n) => typeof n === "number" && isFinite(n))) return null;
+    const [x0, x1] = [b[0], b[2]].map((n) => Math.min(1, Math.max(0, n))).sort((a, c) => a - c);
+    const [y0, y1] = [b[1], b[3]].map((n) => Math.min(1, Math.max(0, n))).sort((a, c) => a - c);
+    return x1 - x0 > 0.003 && y1 - y0 > 0.003 ? [x0, y0, x1, y1] : null;
+  }
+  async function cropBlob(blob, box, maxW = 900, q = 0.85, spots = null) {
     const im = await loadImg(blob);
     const W = im.naturalWidth, H = im.naturalHeight;
     const b = normBox(box) || [0, 0, 1, 1];
@@ -190,11 +260,16 @@
     c.width = Math.max(1, Math.round(sw * scale)); c.height = Math.max(1, Math.round(sh * scale));
     const g = c.getContext("2d"); g.fillStyle = "#fff"; g.fillRect(0, 0, c.width, c.height);
     g.drawImage(im, sx, sy, sw, sh, 0, 0, c.width, c.height);
+    if (spots && spots.length) {
+      const kx = c.width / (b[2] - b[0]), ky = c.height / (b[3] - b[1]);
+      fillSpots(g, c.width, c.height, spots.map((o) => [(o[0] - b[0]) * kx, (o[1] - b[1]) * ky, (o[2] - b[0]) * kx, (o[3] - b[1]) * ky])
+        .filter((r) => r[2] > 0 && r[3] > 0 && r[0] < c.width && r[1] < c.height));
+    }
     URL.revokeObjectURL(im.src);
     return new Promise((r) => c.toBlob((x) => r(x || blob), "image/jpeg", q));
   }
-  async function uploadPhoto(blob, box) {
-    const jpg = await cropBlob(blob, box);
+  async function uploadPhoto(blob, box, spots) {
+    const jpg = await cropBlob(blob, box, 900, 0.85, spots);
     const j = await api("/api/images", { method: "POST", headers: { "content-type": "image/jpeg" }, body: jpg });
     return j.id;
   }
@@ -267,8 +342,20 @@
       url: isUrl(raw.url) ? raw.url : "", price: num(raw.price), mrp: num(raw.mrp),
       colour: raw.colour || "", size: raw.size || "",
       blob: blob || null, preview: blob ? URL.createObjectURL(blob) : "", box: normBox(raw.box) || (blob ? [0, 0, 1, 1] : null),
+      site: raw.site || "", overlays: (raw.overlays || []).map(normSpot).filter(Boolean), clean: true,
       missingPrice: raw.price == null && via !== "you",
     });
+  }
+  // Swap the screenshot crop for the store's own photo (and its link and live price); the crop stays one tap away.
+  function useStorePhoto(it, s) {
+    it.shot = { blob: it.blob, preview: it.preview, box: it.box, origBox: it.origBox };
+    Object.assign(it, { blob: s.blob, preview: URL.createObjectURL(s.blob), box: [0, 0, 1, 1], origBox: null, fromStore: true, url: s.url });
+    if (s.price != null) { it.price = s.price; it.missingPrice = false; }
+    if (s.mrp != null) it.mrp = s.mrp;
+  }
+  function useScreenshot(it) {
+    URL.revokeObjectURL(it.preview);
+    Object.assign(it, it.shot, { fromStore: false, shot: null });
   }
   async function handleImages(files) {
     files = [...files].filter((f) => /^image\//.test(f.type));
@@ -288,6 +375,12 @@
         list.slice(0, 8).forEach((it) => addReviewItem(it, f, via));
         found += list.length;
         renderReview();
+        for (const it of state.review.items.slice(-Math.min(list.length, 8))) {
+          if (!it.site || !it.title || it.url) continue;
+          status(`Looking for it on ${it.site}…`, { busy: true });
+          const s = await findOnStore(it).catch(() => null);
+          if (s) { useStorePhoto(it, s); renderReview(); }
+        }
         if (i === 0) $("#review").scrollIntoView({ block: "start", behavior: "smooth" });
       } catch (e) {
         status(e.message, { err: true }); progress(null);
@@ -447,7 +540,6 @@
     renderBanner();
 
     const gone = goneItems();
-    $("#boughtBadge").hidden = !gone.length; $("#boughtBadge").textContent = gone.length;
     $("#goneStrip").hidden = !gone.length;
     $("#goneRow").replaceChildren(...gone.slice(0, 8).map(wideCard));
     $("#goneList").replaceChildren(...(gone.length ? gone.map(goneItem) : [h("div", { class: "empty" }, h("h3", { text: "Nothing here yet" }), h("p", { text: "When you mark something as bought, or remove it from your rack, it moves here." }))]));
@@ -477,7 +569,9 @@
     const drops = dropped();
     $("#dropsGrid").replaceChildren(...(drops.length ? drops.map(card) : [h("div", { class: "empty" }, h("h3", { text: "No drops yet" }), h("p", { text: "When a saved item gets cheaper, it shows up here." }))]));
 
-    if (state.openId === "settings") renderSettings();
+    renderProfileBits();
+    if (state.openId === "profile") renderProfile();
+    else if (state.openId === "settings") renderSettings();
     else if (state.openId) renderSheet();
   }
 
@@ -569,7 +663,9 @@
     return h("div", { class: "crop-wrap" }, frame,
       h("div", { class: "crop-actions" },
         h("button", { class: "linkish", type: "button", onclick: () => { it.box = [0, 0, 1, 1]; place(); } }, "Use whole screenshot"),
-        it.origBox ? h("button", { class: "linkish", type: "button", onclick: () => { it.box = it.origBox.slice(); place(); } }, "Reset crop") : null));
+        it.origBox ? h("button", { class: "linkish", type: "button", onclick: () => { it.box = it.origBox.slice(); place(); } }, "Reset crop") : null,
+        it.overlays && it.overlays.length ? h("label", { class: "check" }, h("input", { type: "checkbox", checked: it.clean, onchange: (e) => { it.clean = e.target.checked; } }),
+          it.overlays.length === 1 ? "Paint out 1 shop badge" : `Paint out ${it.overlays.length} shop badges`) : null));
   }
 
   // ------------------------------------------------------------ render: review
@@ -594,7 +690,10 @@
         h("h2", { text: many ? `Found ${r.items.length} products` : "Check it, then save" }),
         h("p", { class: "sub", text: "Fix anything that was read wrong. Drag the frame to choose the photo." })),
       h("div", { class: "rv-list" }, r.items.map((it) => h("section", { class: "rv" + (it.checked ? "" : " off"), "aria-label": it.title || "New product" },
-        it.preview ? cropEditor(it) : h("div", { class: "rv-nophoto" }, icon("image", 22), h("span", { text: "No photo. You can add one later from the item." })),
+        it.fromStore ? h("div", { class: "crop-wrap" }, h("img", { class: "rv-store", src: it.preview, alt: "" }),
+          h("div", { class: "crop-actions" }, h("span", { class: "rv-from", text: "Photo from " + it.site }),
+            h("button", { class: "linkish", type: "button", onclick: () => { useScreenshot(it); renderReview(); } }, "Use my screenshot instead")))
+        : it.preview ? cropEditor(it) : h("div", { class: "rv-nophoto" }, icon("image", 22), h("span", { text: "No photo. You can add one later from the item." })),
         h("div", { class: "rv-fields" },
           many ? h("label", { class: "check" }, h("input", { type: "checkbox", checked: it.checked, onchange: (e) => { it.checked = e.target.checked; renderReview(); } }), "Save this one") : null,
           field(it, "title", "Name", { wide: true }),
@@ -610,7 +709,7 @@
         h("button", { class: "btn", type: "button", onclick: discardReview }, "Discard")));
   }
   function discardReview() {
-    state.review?.items.forEach((x) => x.preview && URL.revokeObjectURL(x.preview));
+    state.review?.items.forEach((x) => { if (x.preview) URL.revokeObjectURL(x.preview); if (x.shot?.preview) URL.revokeObjectURL(x.shot.preview); });
     state.review = null; renderReview(); status("");
   }
   async function saveReview() {
@@ -621,7 +720,7 @@
       for (let i = 0; i < todo.length; i++) {
         const it = todo[i];
         status(todo.length > 1 ? `Saving ${i + 1} of ${todo.length}…` : "Saving…", { busy: true });
-        const imageId = it.blob ? await uploadPhoto(it.blob, it.box) : null;
+        const imageId = it.blob ? await uploadPhoto(it.blob, it.box, it.clean && !it.fromStore ? it.overlays : null) : null;
         await putItem({
           id: newId(), title: it.title.trim(), brand: it.brand, store: it.store.trim() || "", url: isUrl(it.url) ? it.url.trim() : "",
           price: it.price, mrp: it.mrp && it.price && it.mrp > it.price ? it.mrp : null, currency: "INR", colour: it.colour.trim(), size: it.size.trim(),
@@ -666,7 +765,7 @@
   function openSheet(id) {
     lastFocus = document.activeElement; state.openId = id;
     history.pushState({ view: state.view, sheet: true }, "", location.hash || "#" + state.view); // phone's back button closes it
-    id === "settings" ? renderSettings() : renderSheet();
+    id === "profile" ? renderProfile() : id === "settings" ? renderSettings() : renderSheet();
     $("#sheet").scrollTop = 0;
     requestAnimationFrame(() => $("#sheet .x")?.focus({ preventScroll: true }));
   }
@@ -777,6 +876,90 @@
     el.replaceChildren(...(busy ? [h("span", { class: "spin", "aria-hidden": "true" })] : []), h("span", { text: msg }));
   }
 
+  // ------------------------------------------------------------ profile (the round avatar)
+  // Kept on this device; also synced through /api/profile when the Worker has it (GET {profile}, PUT {name, photoId}).
+  let profile = { name: "", photoId: "", photo: "" };
+  try { profile = { ...profile, ...JSON.parse(store.get("wr.profile", "{}")) }; } catch {}
+  const profilePhoto = () => profile.photoId ? "/api/images/" + profile.photoId : profile.photo || "";
+  const initial = () => (profile.name.trim()[0] || "").toUpperCase();
+  function saveProfileLocal() { store.set("wr.profile", JSON.stringify(profile)); renderProfileBits(); }
+  function renderProfileBits() {
+    const btn = $("#profileBtn"), src = profilePhoto();
+    btn.replaceChildren(src ? h("img", { src, alt: "", "data-nozoom": "" }) : initial() || icon("user", 22));
+    btn.setAttribute("aria-label", profile.name ? "Your profile, " + profile.name : "Set up your profile");
+    const hello = $("#view-home .hello");
+    hello.replaceChildren(...(profile.name.trim() ? ["Hi ", h("span", { class: "hello-name", text: profile.name.trim().split(/\s+/)[0] }), ", get your favourite fits for less"] : ["Get your favourite fits for less"]));
+  }
+  async function loadProfile() {
+    try {
+      const j = await api("/api/profile");
+      const p = j.profile || j;
+      if (p && (p.name || p.photoId)) { profile = { ...profile, name: p.name || profile.name, photoId: p.photoId || profile.photoId }; saveProfileLocal(); }
+    } catch { /* no profile endpoint yet: this device's copy is used */ }
+  }
+  async function syncProfile() {
+    try { await api("/api/profile", { method: "PUT", headers: { "content-type": "application/json" }, body: JSON.stringify({ name: profile.name, photoId: profile.photoId || null }) }); return true; }
+    catch { return false; }
+  }
+  async function squarePhoto(file) { // centre-crop to a square and shrink, so a profile photo stays small
+    const im = await loadImg(file);
+    const s = Math.min(im.naturalWidth, im.naturalHeight), out = 320;
+    const c = document.createElement("canvas"); c.width = c.height = out;
+    c.getContext("2d").drawImage(im, (im.naturalWidth - s) / 2, (im.naturalHeight - s) / 2, s, s, 0, 0, out, out);
+    URL.revokeObjectURL(im.src);
+    return new Promise((r) => c.toBlob((b) => r(b), "image/jpeg", 0.85));
+  }
+  function renderProfile() {
+    const sheet = $("#sheet");
+    if (sheet.contains(document.activeElement) && document.activeElement.matches("input")) return;
+    const draft = { id: "profile", name: profile.name };
+    const src = profilePhoto();
+    const picIn = h("input", { type: "file", id: "pf-photo", accept: "image/*", hidden: true, onchange: async (e) => {
+      const file = e.target.files && e.target.files[0]; e.target.value = ""; if (!file) return;
+      sheetMsg("Updating your photo…", false, true);
+      try {
+        const blob = await squarePhoto(file);
+        let photoId = "";
+        try { photoId = (await api("/api/images", { method: "POST", headers: { "content-type": "image/jpeg" }, body: blob })).id; } catch {}
+        const old = profile.photoId;
+        profile.photoId = photoId;
+        profile.photo = photoId ? "" : await new Promise((r) => { const fr = new FileReader(); fr.onload = () => r(fr.result); fr.readAsDataURL(blob); });
+        saveProfileLocal(); await syncProfile();
+        if (old && old !== photoId) api("/api/images/" + old, { method: "DELETE" }).catch(() => {});
+        renderProfile(); toast("Profile photo updated.");
+      } catch (err) { sheetMsg(err.message || "Couldn't use that photo. Try another one.", true); }
+    } });
+    showSheet(
+      h("div", { class: "sheet-top" }, closeBtn(), h("h2", { id: "sheetTitle", text: "Your profile" })),
+      h("section", { class: "card-box", style: "justify-items:center;text-align:center" },
+        h("label", { class: "profile-pic", for: "pf-photo", "aria-label": src ? "Change profile photo" : "Add a profile photo" },
+          src ? h("img", { src, alt: "", "data-nozoom": "" }) : (initial() || icon("user", 44))),
+        picIn,
+        h("div", { class: "profile-actions" },
+          h("label", { class: "btn small", for: "pf-photo" }, icon("image", 16), src ? "Change photo" : "Add a photo"),
+          src ? h("button", { class: "btn small danger", type: "button", onclick: async () => {
+            const old = profile.photoId; profile.photoId = ""; profile.photo = ""; saveProfileLocal(); await syncProfile();
+            if (old) api("/api/images/" + old, { method: "DELETE" }).catch(() => {});
+            renderProfile();
+          } }, "Remove photo") : null)),
+      h("section", { class: "card-box" },
+        h("h3", { text: profile.name ? "Your name" : "What should Wishrack call you?" }),
+        h("div", { class: "form" }, field(draft, "name", "Name", { wide: true, ph: "Your name" })),
+        h("div", { class: "row" },
+          h("button", { class: "btn primary small", type: "button", onclick: async () => {
+            profile.name = String(draft.name || "").trim().slice(0, 40);
+            saveProfileLocal();
+            const synced = await syncProfile();
+            document.activeElement?.blur?.();
+            toast(profile.name ? (synced ? "Saved." : "Saved on this device.") : "Name cleared.");
+            renderProfile();
+          } }, "Save name")),
+        h("p", { class: "status", id: "sheetStatus", role: "status", "aria-live": "polite" })),
+      h("section", { class: "card-box" },
+        h("div", { class: "row" },
+          h("button", { class: "btn small", type: "button", onclick: () => { state.openId = "settings"; renderSettings(); $("#sheet").scrollTop = 0; } }, icon("gear", 16), "Settings"))));
+  }
+
   // ------------------------------------------------------------ settings
   function renderSettings() {
     const theme = store.get("wr.theme", "system");
@@ -860,7 +1043,7 @@
     const start = location.hash.slice(1);
     state.view = null; showView("home", false); history.replaceState({ view: "home" }, "", location.pathname + location.search);
     if (["drops", "save", "gone"].includes(start)) showView(start);
-    render(); loadItems();
+    render(); loadItems(); loadProfile();
     fetch("/api/health").then((r) => r.json()).then((j) => { state.ai = !!j.ai; if (state.openId === "settings") renderSettings(); }).catch(() => {});
     takeShared();
   }
@@ -889,17 +1072,20 @@
   $("#fileIn").addEventListener("change", (e) => { const fs = [...(e.target.files || [])]; e.target.value = ""; handleImages(fs); });
   $("#manualBtn").addEventListener("click", () => { addReviewItem({}, null, "you"); renderReview(); $("#review input")?.focus(); });
   $("#sortSel").addEventListener("change", (e) => { state.sort = e.target.value; store.set("wr.sort", state.sort); render(); });
-  $("#settingsBtn").addEventListener("click", () => openSheet("settings"));
+  $("#profileBtn").addEventListener("click", () => openSheet("profile"));
   $("#settingsTab").addEventListener("click", () => openSheet("settings"));
-  $("#boughtBtn").addEventListener("click", () => showView("gone"));
   $("#fabSave").addEventListener("click", () => { if (state.view === "save") $("#linkIn").focus(); else showView("save"); });
   document.querySelectorAll("[data-view]").forEach((b) => b.addEventListener("click", () => showView(b.dataset.view)));
   document.querySelectorAll(".view .back").forEach((b) => b.addEventListener("click", goBack));
   $("#searchBtn").addEventListener("click", () => {
     const row = $("#searchRow"), open = row.hidden;
     row.hidden = !open; $("#searchBtn").setAttribute("aria-expanded", String(open));
+    // While searching, the headline and banner step aside so matches appear right under the field.
+    document.body.classList.toggle("searching", open);
+    window.scrollTo(0, 0);
     if (open) $("#searchIn").focus(); else { state.query = ""; $("#searchIn").value = ""; render(); }
   });
+  $("#searchIn").addEventListener("keydown", (e) => { if (e.key === "Escape") $("#searchBtn").click(); else if (e.key === "Enter") e.target.blur(); });
   $("#searchIn").addEventListener("input", (e) => { state.query = e.target.value; render(); });
   $("#shade").addEventListener("click", closeSheet);
   addEventListener("popstate", (e) => {

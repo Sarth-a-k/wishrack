@@ -143,8 +143,15 @@ final class Processor {
         long now = System.currentTimeMillis();
         for (int i = 0; i < Math.min(items.length(), 8); i++) {
             JSONObject it = items.getJSONObject(i);
-            Bitmap crop = cropBox(full, it.optJSONArray("box"));
-            String imageId = http("POST", base + "/api/images", key, "image/jpeg", jpeg(scaleMax(crop, 900), 85)).getString("id");
+            // Best photo: the store's own clean one (Shopify stores); otherwise the screenshot crop with shop badges painted out.
+            StoreHit hit = findOnStore(it);
+            Bitmap photo = hit != null ? hit.photo : cropBox(full, it.optJSONArray("box"), it.optJSONArray("overlays"));
+            String imageId = http("POST", base + "/api/images", key, "image/jpeg", jpeg(scaleMax(photo, 900), 85)).getString("id");
+            if (hit != null) {
+                it.put("url", hit.url);
+                if (hit.price > 0) it.put("price", hit.price);
+                if (hit.mrp > 0) it.put("mrp", hit.mrp);
+            }
 
             String title = it.optString("title", "").trim();
             boolean hasPrice = !it.isNull("price") && it.optDouble("price", 0) > 0;
@@ -186,17 +193,140 @@ final class Processor {
         return Bitmap.createScaledBitmap(b, Math.max(1, Math.round(w * s)), Math.max(1, Math.round(h * s)), true);
     }
 
-    /** Crops to the product photo box Gemini returned ([x0,y0,x1,y1] fractions), padded slightly; the whole image if there is none. */
-    private static Bitmap cropBox(Bitmap b, JSONArray box) {
-        if (box == null || box.length() != 4) return b;
-        double x0 = box.optDouble(0), y0 = box.optDouble(1), x1 = box.optDouble(2), y1 = box.optDouble(3);
-        if (Double.isNaN(x0 + y0 + x1 + y1) || x1 - x0 < 0.08 || y1 - y0 < 0.08) return b;
-        double pad = 0.02;
+    /** Crops to the product photo box Gemini returned ([x0,y0,x1,y1] fractions), then paints out the shop badges inside it. */
+    private static Bitmap cropBox(Bitmap b, JSONArray box, JSONArray spots) {
         int w = b.getWidth(), h = b.getHeight();
-        int l = (int) Math.max(0, (x0 - pad) * w), t = (int) Math.max(0, (y0 - pad) * h);
-        int r = (int) Math.min(w, (x1 + pad) * w), btm = (int) Math.min(h, (y1 + pad) * h);
-        if (r - l < 16 || btm - t < 16) return b;
-        return Bitmap.createBitmap(b, l, t, r - l, btm - t);
+        int l = 0, t = 0, r = w, btm = h;
+        if (box != null && box.length() == 4) {
+            double x0 = box.optDouble(0), y0 = box.optDouble(1), x1 = box.optDouble(2), y1 = box.optDouble(3);
+            if (!Double.isNaN(x0 + y0 + x1 + y1) && x1 - x0 >= 0.08 && y1 - y0 >= 0.08) {
+                int cl = (int) Math.max(0, x0 * w), ct = (int) Math.max(0, y0 * h), cr = (int) Math.min(w, x1 * w), cb = (int) Math.min(h, y1 * h);
+                if (cr - cl >= 16 && cb - ct >= 16) { l = cl; t = ct; r = cr; btm = cb; }
+            }
+        }
+        Bitmap out = Bitmap.createBitmap(b, l, t, r - l, btm - t).copy(Bitmap.Config.ARGB_8888, true);
+        if (spots == null) return out;
+        int W = out.getWidth(), H = out.getHeight();
+        int[] px = new int[W * H];
+        out.getPixels(px, 0, W, 0, 0, W, H);
+        for (int k = 0; k < spots.length(); k++) {
+            JSONArray o = spots.optJSONArray(k);
+            if (o == null || o.length() != 4) continue;
+            fillSpot(px, W, H, (int) Math.floor(o.optDouble(0) * w) - l, (int) Math.floor(o.optDouble(1) * h) - t,
+                    (int) Math.ceil(o.optDouble(2) * w) - l, (int) Math.ceil(o.optDouble(3) * h) - t);
+        }
+        out.setPixels(px, 0, W, 0, 0, W, H);
+        return out;
+    }
+
+    /** Fills one spot from the pixels just around it, each side counting more the closer it is (same as the web app). */
+    static void fillSpot(int[] px, int W, int H, int ax0, int ay0, int ax1, int ay1) {
+        int x0 = Math.max(0, Math.min(ax0, ax1) - 3), y0 = Math.max(0, Math.min(ay0, ay1) - 3);
+        int x1 = Math.min(W, Math.max(ax0, ax1) + 3), y1 = Math.min(H, Math.max(ay0, ay1) + 3);
+        int w = x1 - x0, h = y1 - y0;
+        if (w < 2 || h < 2 || (long) w * h > (long) W * H / 4) return;
+        boolean hasL = x0 > 0, hasR = x1 < W, hasT = y0 > 0, hasB = y1 < H;
+        if (!hasL && !hasR && !hasT && !hasB) return;
+        int[] fill = new int[w * h];
+        for (int y = y0; y < y1; y++) for (int x = x0; x < x1; x++) {
+            double u = (x - x0 + 1.0) / (w + 1), v = (y - y0 + 1.0) / (h + 1), r = 0, g = 0, bl = 0, wt = 0, k;
+            int[] src = new int[4]; double[] ks = new double[4]; int n = 0;
+            if (hasL) { src[n] = px[y * W + x0 - 1]; ks[n++] = 1 / u; }
+            if (hasR) { src[n] = px[y * W + x1]; ks[n++] = 1 / (1 - u); }
+            if (hasT) { src[n] = px[(y0 - 1) * W + x]; ks[n++] = 1 / v; }
+            if (hasB) { src[n] = px[y1 * W + x]; ks[n++] = 1 / (1 - v); }
+            for (int i = 0; i < n; i++) {
+                k = ks[i];
+                r += ((src[i] >> 16) & 255) * k; g += ((src[i] >> 8) & 255) * k; bl += (src[i] & 255) * k; wt += k;
+            }
+            fill[(y - y0) * w + (x - x0)] = 0xff000000 | ((int) (r / wt) << 16) | ((int) (g / wt) << 8) | (int) (bl / wt);
+        }
+        for (int y = 0; y < h; y++) System.arraycopy(fill, y * w, px, (y + y0) * W + x0, w);
+    }
+
+    // ---------------------------------------------------------------- the store's own photo (Shopify stores)
+    static final class StoreHit { String url; double price, mrp; Bitmap photo; }
+
+    /** Searches the product's Shopify store by name; returns its link, live price and clean photo, or null. */
+    static StoreHit findOnStore(JSONObject it) {
+        try {
+            String site = it.optString("site", ""), title = it.optString("title", "").trim();
+            if (site.isEmpty() || title.isEmpty() || it.optString("url", "").startsWith("http")) return null;
+            String raw = shopSearch(site, title);
+            if (raw == null) return null;
+            JSONArray list = new JSONObject(raw).getJSONObject("resources").getJSONObject("results").getJSONArray("products");
+            String best = null;
+            double score = 0;
+            for (int i = 0; i < list.length(); i++) {
+                JSONObject p = list.getJSONObject(i);
+                // A different colour of the same product is a different photo, so a known colour must be in the store's title.
+                String colour = it.optString("colour", "").trim();
+                double sc = colour.isEmpty() || nameMatch(colour, p.optString("title", "")) == 1 ? nameMatch(title, p.optString("title", "")) : 0;
+                if (sc > score) { score = sc; best = p.optString("url", ""); }
+            }
+            if (best == null || score < 0.75 || !best.startsWith("/products/")) return null;
+            StoreHit hit = new StoreHit();
+            hit.url = "https://" + site + best.split("\\?")[0];
+            String js = getText(hit.url + ".js");
+            if (js == null) return null;
+            JSONObject p = new JSONObject(js);
+            JSONArray vs = p.optJSONArray("variants");
+            JSONObject v = null;
+            if (vs != null) for (int i = 0; i < vs.length() && v == null; i++) if (vs.getJSONObject(i).optBoolean("available")) v = vs.getJSONObject(i);
+            if (v == null && vs != null && vs.length() > 0) v = vs.getJSONObject(0);
+            if (v == null) v = p;
+            hit.price = v.optDouble("price", 0) / 100;
+            double cmp = v.optDouble("compare_at_price", 0) / 100;
+            hit.mrp = cmp > hit.price ? cmp : 0;
+            String img = p.optString("featured_image", "");
+            if (img.isEmpty()) return null;
+            if (img.startsWith("//")) img = "https:" + img;
+            byte[] bytes = getBytes(img);
+            hit.photo = bytes == null ? null : BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+            return hit.photo == null ? null : hit;
+        } catch (Exception e) {
+            return null; // fall back to the screenshot crop
+        }
+    }
+
+    static String shopSearch(String site, String q) {
+        if (!site.matches("[a-z0-9-]+(\\.[a-z0-9-]+)+")) return null;
+        try {
+            return getText("https://" + site + "/search/suggest.json?q=" + java.net.URLEncoder.encode(q, "UTF-8") + "&resources%5Btype%5D=product&resources%5Blimit%5D=5");
+        } catch (Exception e) { return null; }
+    }
+
+    /** Share of the wanted words found in a store title; 1 means all of them. */
+    static double nameMatch(String want, String title) {
+        java.util.Set<String> have = new java.util.HashSet<>(), need = new java.util.LinkedHashSet<>();
+        for (String w : title.toLowerCase().split("[^a-z0-9]+")) if (w.length() > 1) have.add(w);
+        for (String w : want.toLowerCase().split("[^a-z0-9]+")) if (w.length() > 1) need.add(w);
+        if (need.isEmpty()) return 0;
+        int hit = 0;
+        for (String w : need) if (have.contains(w)) hit++;
+        return (double) hit / need.size();
+    }
+
+    static String getText(String url) {
+        byte[] b = getBytes(url);
+        return b == null ? null : new String(b, StandardCharsets.UTF_8);
+    }
+
+    static byte[] getBytes(String url) {
+        try {
+            HttpURLConnection con = (HttpURLConnection) new URL(url).openConnection();
+            con.setConnectTimeout(8000);
+            con.setReadTimeout(12000);
+            con.setRequestProperty("user-agent", "Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0 Mobile Safari/537.36");
+            if (con.getResponseCode() != 200) return null;
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            try (InputStream in = con.getInputStream()) {
+                byte[] buf = new byte[8192];
+                int n;
+                while ((n = in.read(buf)) > 0) { out.write(buf, 0, n); if (out.size() > 8_000_000) return null; }
+            }
+            return out.toByteArray();
+        } catch (Exception e) { return null; }
     }
 
     private static byte[] jpeg(Bitmap b, int q) {

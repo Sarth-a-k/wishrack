@@ -260,6 +260,15 @@ public class MainActivity extends Activity {
             });
         }
 
+        /** Store search for the review screen: browsers can't read Shopify's search, but the phone can. Answers via window.__wrShop. */
+        @JavascriptInterface public void shopSearch(String id, String site, String q) {
+            new Thread(() -> {
+                String text = Processor.shopSearch(site == null ? "" : site, q == null ? "" : q);
+                String js = "window.__wrShop(" + JSONObject.quote(id) + "," + JSONObject.quote(text == null ? "" : text) + ")";
+                runOnUiThread(() -> { if (web != null) web.evaluateJavascript(js, null); });
+            }).start();
+        }
+
         @JavascriptInterface public String status() {
             if (!Processor.hasMediaPermission(MainActivity.this)) return "Photo access is off, so new screenshots can't be seen. Turn the switch on to allow it (choose Allow all).";
             if (!Processor.prefs(MainActivity.this).getBoolean("auto", true)) return "Off. Share screenshots to Wishrack to save them.";

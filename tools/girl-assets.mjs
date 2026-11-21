@@ -108,3 +108,42 @@ frames.forEach((f, i) => out("drawable-nodpi", `girl_skip_${String(i).padStart(2
 
 console.assert(head.w === 380 && frames.length === 30, "unexpected sizes");
 console.log(`icon done; 30 splash frames at ${W}x${H}`);
+
+// ---------------------------------------------------------------- web app: one strip per animation for app/girl.js
+// All frames share one crop box, so her feet stay at the same spot in every frame.
+// The game draws a soft shadow under her feet (black at about 30% opacity); the app draws its own on whatever
+// surface is below her, so remove it here, or it would fly through the air with her when she jumps.
+function noShadow(img) {
+  for (let y = 540; y < img.h; y++) for (let x = 0; x < img.w; x++) {
+    const i = (y * img.w + x) * 4;
+    if (img.px[i + 3] <= 100 && img.px[i] < 24 && img.px[i + 1] < 24 && img.px[i + 2] < 24) img.px[i + 3] = 0;
+  }
+  return img;
+}
+const ANIMS = {
+  walkR: [914, 929], walkL: [1899, 1914], skipR: [2124, 2153], skipL: [2095, 2123],
+  turnL: [1895, 1898], stopL: [930, 940], stopR: [974, 984], byeL: [2021, 2057],
+  frontL: [1915, 1930], idleR: [985, 1044, 2],
+};
+const K = 0.27, FEET_Y = 626; // about 2x the 58x91 px she is shown at; feet line in the source frames
+const all = Object.fromEntries(Object.entries(ANIMS).map(([k, [a, b, step = 1]]) => {
+  const list = [];
+  for (let i = a; i <= b; i += step) list.push(noShadow(decode(join(SRC, `girl_${String(i).padStart(4, "0")}.png`))));
+  return [k, list];
+}));
+const wb = bbox(Object.values(all).flat());
+const FW = Math.round(wb.w * K), FH = Math.round(wb.h * K);
+const WEB = new URL("../app/girl/", import.meta.url);
+mkdirSync(WEB, { recursive: true });
+const meta = { w: FW, h: FH, feetX: Math.round((215 - wb.x0) * K), feetY: Math.round((FEET_Y - wb.y0) * K), frames: {} };
+for (const [k, list] of Object.entries(all)) {
+  const strip = { w: FW * list.length, h: FH, px: Buffer.alloc(FW * list.length * FH * 4) };
+  list.forEach((f, i) => {
+    const s = scale(crop(f, wb.x0, wb.y0, wb.w, wb.h), FW, FH);
+    for (let y = 0; y < FH; y++) s.px.copy(strip.px, (y * strip.w + i * FW) * 4, y * FW * 4, (y + 1) * FW * 4);
+  });
+  writeFileSync(new URL(k + ".png", WEB), encode(strip));
+  meta.frames[k] = list.length;
+}
+writeFileSync(new URL("girl.json", WEB), JSON.stringify(meta));
+console.log(`web strips: ${FW}x${FH} per frame`, meta.frames);

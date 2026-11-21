@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Wishrack girl walk</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root { --page: #eaf4ef; --panel: #dcebe3; --forest: #12493b; --on-forest-2: #cfe3d9; --sage: #a9c9ad; --ink: #13241e; --ink-2: #56685f; --drop: #2a7d45; }
+* { box-sizing: border-box; margin: 0; }
+body { background: #c9ddd3; font-family: Poppins, system-ui, sans-serif; color: var(--ink); padding: 24px 16px 40px; display: grid; justify-items: center; gap: 14px; }
+h1 { font-size: 20px; color: var(--forest); }
+p.lead { font-size: 13.5px; color: var(--ink-2); max-width: 52ch; text-align: center; }
+.phone { width: 390px; height: 844px; border-radius: 44px; background: var(--page); position: relative; overflow: hidden;
+  box-shadow: 0 30px 60px -30px rgba(18,73,59,.55), 0 0 0 8px #0f2a22; }
+.top { position: absolute; left: 20px; right: 20px; top: 40px; display: flex; justify-content: space-between; align-items: center; }
+.top b { font-size: 22px; color: var(--forest); }
+.avatar { width: 44px; height: 44px; border-radius: 50%; background: var(--forest); color: #fff; display: grid; place-items: center; font-weight: 600; }
+.banner { position: absolute; left: 16px; width: 358px; top: 150px; height: 140px; border-radius: 22px; background: var(--forest); color: #fff; padding: 26px 140px 0 24px; }
+.banner h2 { font-size: 19px; }
+.banner p { font-size: 12.5px; color: var(--on-forest-2); margin-top: 6px; line-height: 1.45; }
+.banner .ph { position: absolute; right: 14px; top: -26px; width: 110px; height: 156px; border-radius: 20px; background: #f4faf7; overflow: hidden; display: grid; place-items: center; }
+.banner .ph span { position: absolute; right: 8px; top: 10px; background: #fff; color: var(--drop); font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 999px; box-shadow: 0 2px 8px rgba(0,0,0,.08); }
+.banner .ph i { width: 46px; height: 110px; border-radius: 12px 12px 6px 6px; background: #4b4f4a; margin-top: 30px; }
+.grid { position: absolute; left: 16px; right: 16px; top: 318px; display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.card { height: 200px; border-radius: 22px; background: var(--forest); overflow: hidden; }
+.card div { height: 146px; background: var(--panel); border-radius: 22px 22px 26px 26px; }
+.bar { position: absolute; left: 0; bottom: 0; width: 390px; height: 130px; z-index: 2; filter: drop-shadow(0 -8px 14px rgba(18,73,59,.08)); }
+.scan { position: absolute; left: 160px; top: 690px; width: 70px; height: 70px; border-radius: 50%; background: var(--forest); border: 6px solid #f4f8f6; display: grid; place-items: center; box-shadow: 0 10px 22px -10px rgba(18,73,59,.6); z-index: 3; }
+.scan svg { width: 26px; height: 26px; }
+.girl { position: absolute; left: 0; top: 0; width: 58px; height: 91px; z-index: 5; pointer-events: none; transform-origin: 50% 93%; }
+.controls { display: flex; gap: 10px; }
+button { font: 600 13px Poppins, sans-serif; border: 0; border-radius: 12px; height: 40px; padding: 0 16px; background: var(--forest); color: #fff; cursor: pointer; }
+button.alt { background: #fff; color: var(--forest); }
+</style>
+</head>
+<body>
+<h1>The girl's walk, on the home screen</h1>
+<p class="lead">She walks along the top of the price-drop banner, jumps down to the curved bottom bar, hops over the scan button, then stops and raises her hand to say bye.</p>
+<div class="phone" id="phone">
+  <div class="top"><b>Wishrack</b><div class="avatar">W</div></div>
+  <div class="banner"><h2>Price dropped</h2><p>Taupe Everyday Joggers is now <b>Rs. 1,399</b> at Bonkers Corner, down from Rs. 1,499.</p><div class="ph"><span>↓ Rs. 100</span><i></i></div></div>
+  <div class="grid"><div class="card"><div></div></div><div class="card"><div></div></div><div class="card"><div></div></div><div class="card"><div></div></div></div>
+  <svg class="bar" viewBox="0 714 390 130" preserveAspectRatio="none" aria-hidden="true">
+    <path id="barFill" d="M0,742 C90,736 130,770 195,770 C260,770 300,736 390,742 L390,844 L0,844 Z" fill="#f4f8f6"/>
+    <path id="barTop" d="M0,742 C90,736 130,770 195,770 C260,770 300,736 390,742" fill="none"/>
+  </svg>
+  <div class="scan"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><path d="M4 8V5h3M17 5h3v3M20 16v3h-3M7 19H4v-3M8 12h8"/></svg></div>
+  <img class="girl" id="girl" alt="">
+</div>
+<div class="controls"><button id="play">Play again</button><button class="alt" id="slow">Slow motion</button></div>
+<script>
+const range = (a, b) => Array.from({ length: b - a + 1 }, (_, i) => `girl/girl_${String(a + i).padStart(4, "0")}.png`);
+const A = {
+  walkR: range(914, 929), walkL: range(1899, 1914), skipR: range(2124, 2153), skipL: range(2095, 2123),
+  stopL: range(930, 940), byeL: range(2021, 2057), turnL: range(1895, 1898), idleL: range(1, 59),
+};
+Object.values(A).flat().forEach((s) => { new Image().src = s; });
+const girl = document.getElementById("girl"), edge = document.getElementById("barTop");
+const FEET = 0.93, W = 58, H = 91;
+// Feet at (x, y) in phone pixels.
+const place = (x, y, frame, rot = 0, sx = 1, sy = 1) => { girl.src = frame; girl.style.transform = `translate(${x - W / 2}px, ${y - H * FEET}px) rotate(${rot}deg) scale(${sx}, ${sy})`; };
+// A real jump: constant sideways speed, a quick rise to `apex` px above the start, then gravity pulls her down to (x1, y1).
+const G = 2600;
+function jump(x0, y0, x1, y1, apex) {
+  const v0 = Math.sqrt(2 * G * apex), D = y1 - y0;
+  const T = (v0 + Math.sqrt(v0 * v0 + 2 * G * D)) / G;
+  return { T, at: (s) => ({ x: x0 + (x1 - x0) * s / T, y: y0 - v0 * s + G * s * s / 2, vy: -v0 + G * s }) };
+}
+// Skip frames: 5-9 crouch, 12-16 push off and rise, 17 falling, 18 legs out for landing, 19-24 landing bend.
+const airFrame = (set, s, T) => set[s < 0.16 ? 12 + Math.min(4, Math.floor(s / 0.04)) : T - s < 0.08 ? 18 : 17];
+const range5 = (set, from, t, n) => set[from + Math.min(n - 1, Math.floor(t * n))];
+// y of the bottom bar's top edge at x, read from the SVG curve.
+const L = edge.getTotalLength();
+const curveY = (x) => { let lo = 0, hi = L; for (let i = 0; i < 24; i++) { const m = (lo + hi) / 2; if (edge.getPointAtLength(m).x < x) lo = m; else hi = m; } return edge.getPointAtLength(lo).y; };
+const slope = (x) => Math.atan2(curveY(x + 4) - curveY(x - 4), 8) * 180 / Math.PI;
+
+const BANNER_Y = 150;
+// The flight, then a short squash and knee bend on landing.
+function airborne(set, x0, y0, x1, y1f, apex) {
+  const y1 = y1f(), j = jump(x0, y0, x1, y1, apex);
+  return [
+    { d: j.T, run: (t) => { const s = t * j.T, p = j.at(s); place(p.x, p.y, airFrame(set, s, j.T), Math.max(-6, Math.min(8, p.vy / 140)) * Math.sign(x1 - x0)); } },
+    { d: 0.3, run: (t) => { const k = Math.max(0, 1 - t / 0.45); place(x1, y1, range5(set, 19, t, 6), 0, 1 + 0.1 * k, 1 - 0.14 * k); } },
+  ];
+}
+const steps = [
+  { d: 3.0, run: (t, e) => { const x = 46 + (230 - 46) * t; place(x, BANNER_Y, A.walkR[Math.floor(e * 18) % 16]); } },
+  { d: 0.2, run: (t) => place(230, BANNER_Y, range5(A.skipR, 5, t, 5)) }, // crouch at the edge
+  ...airborne(A.skipR, 230, BANNER_Y, 346, () => curveY(346), 34),
+  { d: 0.18, run: (t) => place(346, curveY(346), A.turnL[Math.min(3, Math.floor(t * 4))]) },
+  { d: 1.6, run: (t, e) => { const x = 346 - (346 - 268) * t; place(x, curveY(x), A.walkL[Math.floor(e * 18) % 16]); } },
+  { d: 0.14, run: (t) => place(268, curveY(268), range5(A.skipL, 5, t, 5)) },
+  ...airborne(A.skipL, 268, curveY(268), 122, () => curveY(122), 96), // hop over the scan button
+  { d: 1.5, run: (t, e) => { const x = 122 - (122 - 52) * t; place(x, curveY(x), A.walkL[Math.floor(e * 18) % 16]); } },
+  { d: 0.4, run: (t) => place(52, curveY(52), A.stopL[Math.min(10, Math.floor(t * 11))]) },
+  { d: 1.6, run: (t) => place(52, curveY(52), A.byeL[Math.min(A.byeL.length - 1, Math.floor(t * A.byeL.length))]) },
+
+];
+let start = 0, speed = 1, raf = 0;
+function frame(now) {
+  let e = (now - start) / 1000 * speed;
+  for (const s of steps) {
+    if (e < s.d) { s.run(e / s.d, e); raf = requestAnimationFrame(frame); return; }
+    e -= s.d;
+  }
+  // She stays at the end of the bar, idling, until the next walk.
+  place(52, curveY(52), A.idleL[Math.floor(e * 24) % A.idleL.length]);
+  raf = requestAnimationFrame(frame);
+}
+function play() { cancelAnimationFrame(raf); girl.style.opacity = 1; start = performance.now(); raf = requestAnimationFrame(frame); }
+document.getElementById("play").onclick = () => { speed = 1; play(); };
+document.getElementById("slow").onclick = () => { speed = 0.4; play(); };
+play();
+</script>
+</body>
+</html>
