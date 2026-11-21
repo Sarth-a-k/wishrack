@@ -109,7 +109,8 @@ frames.forEach((f, i) => out("drawable-nodpi", `girl_skip_${String(i).padStart(2
 console.assert(head.w === 380 && frames.length === 30, "unexpected sizes");
 console.log(`icon done; 30 splash frames at ${W}x${H}`);
 
-// ---------------------------------------------------------------- web app: one strip per animation for app/girl.js
+// ---------------------------------------------------------------- web app: one picture sheet for app/girl.js
+// Every frame of every move sits on one sheet, so switching moves never loads a new picture (no blink).
 // All frames share one crop box, so her feet stay at the same spot in every frame.
 // The game draws a soft shadow under her feet (black at about 30% opacity); the app draws its own on whatever
 // surface is below her, so remove it here, or it would fly through the air with her when she jumps.
@@ -120,30 +121,49 @@ function noShadow(img) {
   }
   return img;
 }
+const lowest = (img) => { for (let y = img.h - 1; y >= 0; y--) for (let x = 0; x < img.w; x++) if (img.px[(y * img.w + x) * 4 + 3] > 200) return y; return img.h; };
 const ANIMS = {
   walkR: [914, 929], walkL: [1899, 1914], skipR: [2124, 2153], skipL: [2095, 2123],
   turnL: [1895, 1898], stopL: [930, 940], stopR: [974, 984], byeL: [2021, 2057],
   frontL: [1915, 1930], idleR: [985, 1044, 2],
 };
-const K = 0.27, FEET_Y = 626; // about 2x the 58x91 px she is shown at; feet line in the source frames
+const SHOWN = 2.5, K = 0.27 * SHOWN / 2, FEET_Y = 626; // drawn at 2.5x the 51 px she is shown at, sharp on 3x phone screens
 const all = Object.fromEntries(Object.entries(ANIMS).map(([k, [a, b, step = 1]]) => {
   const list = [];
   for (let i = a; i <= b; i += step) list.push(noShadow(decode(join(SRC, `girl_${String(i).padStart(4, "0")}.png`))));
   return [k, list];
 }));
 const wb = bbox(Object.values(all).flat());
-const FW = Math.round(wb.w * K), FH = Math.round(wb.h * K);
+const FW = Math.round(wb.w * K), FH = Math.round(wb.h * K), COLS = 16, PAD = 3; // a clear gap round each frame stops neighbours bleeding in
+const CW = FW + 2 * PAD, CH = FH + 2 * PAD;
+const small = Object.fromEntries(Object.entries(all).map(([k, list]) => [k, list.map((f) => scale(crop(f, wb.x0, wb.y0, wb.w, wb.h), FW, FH))]));
+const total = Object.values(small).reduce((n, l) => n + l.length, 0), ROWS = Math.ceil(total / COLS);
+const sheet = { w: CW * COLS, h: CH * ROWS, px: Buffer.alloc(CW * COLS * CH * ROWS * 4) };
+const meta = { w: CW, h: CH, cols: COLS, rows: ROWS, scale: 1 / SHOWN, feetX: PAD + Math.round((215 - wb.x0) * K), feetY: PAD + Math.round((FEET_Y - wb.y0) * K), anims: {}, air: {}, endOn: {}, startAt: {} };
+let n = 0;
+for (const [k, list] of Object.entries(small)) {
+  meta.anims[k] = { start: n, n: list.length };
+  for (const f of list) {
+    const cx = (n % COLS) * CW + PAD, cy = Math.floor(n / COLS) * CH + PAD;
+    for (let y = 0; y < FH; y++) f.px.copy(sheet.px, ((cy + y) * sheet.w + cx) * 4, y * FW * 4, (y + 1) * FW * 4);
+    n++;
+  }
+}
+// Skips: how far off the ground her feet are in each frame (1 = in the air), so she only moves forward while airborne.
+for (const k of ["skipR", "skipL"]) {
+  const lows = all[k].map(lowest), max = Math.max(...lows);
+  meta.air[k] = lows.map((l) => +Math.max(0.06, Math.min(1, (max - l) / 22)).toFixed(2));
+}
+// Which frame of one move looks most like a frame of another, so moves join without a visible jump.
+const diff = (a, b) => { let d = 0; for (let i = 0; i < a.px.length; i += 16) d += Math.abs(a.px[i] - b.px[i]) + Math.abs(a.px[i + 3] - b.px[i + 3]); return d; };
+const best = (set, target) => small[set].reduce((bi, f, i) => (diff(f, target) < diff(small[set][bi], target) ? i : bi), 0);
+for (const [mv, stop] of [["walkR", "stopR"], ["walkL", "stopL"], ["skipR", "stopR"], ["skipL", "stopL"]]) meta.endOn[mv] = best(mv, small[stop][0]);
+meta.startAt.walkLAfterTurn = best("walkL", small.turnL[3]);
+meta.startAt.walkRAfterLand = best("walkR", small.skipR[24]);
+meta.startAt.walkLAfterLand = best("walkL", small.skipL[24]);
+meta.startAt.skipLAfterTurn = best("skipL", small.turnL[3]);
 const WEB = new URL("../app/girl/", import.meta.url);
 mkdirSync(WEB, { recursive: true });
-const meta = { w: FW, h: FH, feetX: Math.round((215 - wb.x0) * K), feetY: Math.round((FEET_Y - wb.y0) * K), frames: {} };
-for (const [k, list] of Object.entries(all)) {
-  const strip = { w: FW * list.length, h: FH, px: Buffer.alloc(FW * list.length * FH * 4) };
-  list.forEach((f, i) => {
-    const s = scale(crop(f, wb.x0, wb.y0, wb.w, wb.h), FW, FH);
-    for (let y = 0; y < FH; y++) s.px.copy(strip.px, (y * strip.w + i * FW) * 4, y * FW * 4, (y + 1) * FW * 4);
-  });
-  writeFileSync(new URL(k + ".png", WEB), encode(strip));
-  meta.frames[k] = list.length;
-}
+writeFileSync(new URL("girl.png", WEB), encode(sheet));
 writeFileSync(new URL("girl.json", WEB), JSON.stringify(meta));
-console.log(`web strips: ${FW}x${FH} per frame`, meta.frames);
+console.log(`web sheet: ${sheet.w}x${sheet.h}, ${total} frames of ${FW}x${FH}`, JSON.stringify({ air: meta.air, endOn: meta.endOn, startAt: meta.startAt }));

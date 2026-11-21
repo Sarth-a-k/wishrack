@@ -202,12 +202,17 @@ const FIELDS = `For each product give:
 
 const GEMINI = "https://generativelanguage.googleapis.com/v1beta/models";
 let liveModel = ""; // a working model found at run time, kept while this Worker instance lives
+// Each Gemini model has its own free daily allowance. When one runs out, remember it for a few hours (in this Worker
+// instance) and use the others meanwhile.
+const spent = new Map();
+const isSpent = (m) => Date.now() - (spent.get(m) || 0) < 6 * 3600e3;
 
 async function gemini(env, parts) {
   if (!env.GEMINI_API_KEY) throw new HttpError(503, "no_ai", "Screenshot reading isn't set up. Add a Gemini key (see SETUP.md).");
   // GEMINI_MODEL pins a model; empty means use the newest stable Flash model Google lists (looked up once per Worker instance).
   if (!env.GEMINI_MODEL && !liveModel) liveModel = await pickFlashModel(env);
   let model = env.GEMINI_MODEL || liveModel || "gemini-flash-latest";
+  if (isSpent(model)) { const alt = (await fallbackModels(env, model, 4)).find((m) => !isSpent(m)); if (alt) model = alt; }
   // Time limits keep the whole attempt, fallbacks included, under the phone app's 90-second wait.
   let r = await callGemini(env, model, parts, 35000);
   let errText = r.ok ? "" : await r.text();
@@ -233,7 +238,18 @@ async function gemini(env, parts) {
       if (r.ok || (r.status < 500 && r.status !== 404)) break;
     }
   }
-  if (r.status === 429) throw new HttpError(429, "ai_limit", "Gemini's free daily limit is used up. It resets tomorrow; the app reads screenshots on your device meanwhile.");
+  // Out of free allowance on this model: try the others (Flash-Lite has the biggest daily allowance).
+  if (r.status === 429) {
+    spent.set(model, Date.now());
+    for (const alt of await fallbackModels(env, model, 4)) {
+      if (isSpent(alt)) continue;
+      r = await callGemini(env, alt, parts, 20000);
+      errText = r.ok ? "" : await r.text();
+      if (r.status === 429) { spent.set(alt, Date.now()); continue; }
+      if (r.ok || r.status < 500) break;
+    }
+  }
+  if (r.status === 429) throw new HttpError(429, "ai_limit", "Gemini's free limit is used up for now (it resets by tomorrow). Auto-saved screenshots wait and are read then.");
   if (r.status === 400 || r.status === 403) {
     throw new HttpError(502, "ai_key", /API key|PERMISSION|api_key/i.test(errText) ? "Gemini rejected the key. Check GEMINI_API_KEY (see SETUP.md)." : "Gemini refused the request: " + errText.slice(0, 200));
   }
@@ -270,22 +286,22 @@ async function pickFlashModel(env) {
   } catch { return ""; }
 }
 // Up to two other models to try while ours is overloaded: other stable Flash models, newest first, then Flash-Lite.
-async function fallbackModels(env, current) {
+async function fallbackModels(env, current, max = 2) {
   try {
     const r = await fetch(`${GEMINI}?pageSize=200`, { headers: { "x-goog-api-key": env.GEMINI_API_KEY }, signal: AbortSignal.timeout(10000) });
     if (!r.ok) return [];
     const names = ((await r.json()).models || [])
       .filter((m) => (m.supportedGenerationMethods || []).includes("generateContent"))
       .map((m) => String(m.name || "").replace(/^models\//, ""));
-    return orderFallbacks(names, current);
+    return orderFallbacks(names, current, max);
   } catch { return []; }
 }
-function orderFallbacks(names, current) {
+function orderFallbacks(names, current, max = 2) {
   const version = (n) => Number((n.match(/gemini-(\d+(?:\.\d+)?)/) || [])[1] || 0);
   const stable = (n) => /^gemini-\d/.test(n) && /flash/.test(n) && !/image|tts|audio|live|embed|exp|preview|8b/.test(n);
   const full = names.filter((n) => stable(n) && !/lite/.test(n)).sort((a, b) => version(b) - version(a));
   const lite = names.filter((n) => stable(n) && /lite/.test(n)).sort((a, b) => version(b) - version(a));
-  return [...full, ...lite].filter((n) => n !== current).slice(0, 2);
+  return [...full, ...lite].filter((n) => n !== current).slice(0, max);
 }
 // The newest stable numbered Flash model (faster than the "latest" alias, which can point at a slower new release).
 function chooseFlash(names) {

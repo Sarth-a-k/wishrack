@@ -4,18 +4,20 @@
 // there's a new price drop, and wags her finger when a search finds nothing. Tap her and she hops.
 // Self-contained: reads #view-home, #view-save, #banner (.art, .slide), .tabbar-bg, #status and #grid. Off for reduced motion.
 (() => {
-  const BASE = "/girl/", SCALE = 0.5; // the strips are drawn at 2x
+  const BASE = "/girl/"; // girl.png holds every frame of every move; girl.json says where each one is
   if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
   let meta, el, shade, W, H, FX, FY;
+  const N = (name) => meta.anims[name].n;
   const rand = (a, b) => a + Math.random() * (b - a);
 
   // ------------------------------------------------------------ drawing
+  // Only the position on the one picture sheet changes, so switching moves never loads a new picture (no blink).
   function frame(name, i) {
-    const n = meta.frames[name];
-    i = Math.max(0, Math.min(n - 1, i | 0));
-    if (el.dataset.a !== name) { el.dataset.a = name; el.style.backgroundImage = `url(${BASE}${name}.png)`; el.style.backgroundSize = `${n * W}px ${H}px`; }
-    el.style.backgroundPosition = `${-i * W}px 0`;
+    const a = meta.anims[name], k = a.start + Math.max(0, Math.min(a.n - 1, i | 0));
+    el.dataset.a = name;
+    el.style.backgroundPosition = `${-(k % meta.cols) * W}px ${-Math.floor(k / meta.cols) * H}px`;
   }
+  const px = (v) => Math.round(v * devicePixelRatio) / devicePixelRatio; // whole screen pixels: no shimmer
   // Feet at (x, y) in viewport pixels. Her shadow goes on the nearest surface below her and shrinks as she rises.
   // A tap adds a little hop on top of whatever she is doing.
   let hopAt = -1e9, last = null;
@@ -25,19 +27,19 @@
     if (h < 0.46) { y -= 4 * 34 * (h / 0.46) * (1 - h / 0.46); name = el.dataset.dir === "L" ? "skipL" : "skipR"; i = h < 0.08 ? 9 : h > 0.4 ? 19 : 16; }
     else el.dataset.dir = /L$/.test(name) ? "L" : "R";
     frame(name, i);
-    el.style.transform = `translate(${x - FX}px, ${y - FY}px) rotate(${rot}deg) scale(${sx}, ${sy})`;
+    el.style.transform = `translate(${px(x - FX)}px, ${px(y - FY)}px) rotate(${rot}deg) scale(${sx}, ${sy})`;
     const g = ground(x, y), up = g == null ? Infinity : g - y;
     const k = up > 240 ? 0 : Math.max(0.25, 1 - up / 240);
     shade.style.opacity = k;
     if (k) shade.style.transform = `translate(${x - 16}px, ${g - 4}px) scale(${k})`;
   }
-  const loop = (name, secs, fps = 24) => Math.floor(secs * fps) % meta.frames[name];
+  const loop = (name, secs, fps = 24) => Math.floor(secs * fps) % N(name);
   const rectOf = (sel) => { const n = document.querySelector(sel); return n && n.offsetParent !== null ? n.getBoundingClientRect() : null; };
   // Surfaces she can stand on or cast a shadow on: the banner, the "Nothing matches" box, the status line, the bottom bar.
   function ground(x, y) {
     let best = null;
     const take = (v) => { if (v != null && v >= y - 2 && (best == null || v < best)) best = v; };
-    for (const r of [rectOf("#banner"), rectOf("#grid .empty"), rectOf("#status")]) if (r && r.height && x > r.left + 8 && x < r.right - 8) take(r.top);
+    for (const r of [rectOf("#banner"), rectOf("#grid .empty"), rectOf("#status"), rectOf("#searchIn")]) if (r && r.height && x > r.left + 8 && x < r.right - 8) take(r.top);
     const t = bar();
     take(t && t.yAt(x));
     return best;
@@ -82,8 +84,8 @@
     const r = b.getBoundingClientRect();
     if (r.top < 70 || r.top > innerHeight * 0.6) return null;
     let end = r.right - 34;
-    const art = b.querySelector(".art");
-    if (art) { const a = art.getBoundingClientRect(); if (a.top < r.top - 4) end = a.left - 14; }
+    // Stop before anything poking up out of the banner (the price-drop tag, or the product photo in some layouts).
+    for (const n of b.querySelectorAll(".art, .tag")) { const a = n.getBoundingClientRect(); if (a.width && a.top < r.top - 4) end = Math.min(end, a.left - 14); }
     return { y: r.top, x0: r.left + 26, x1: end };
   }
   // Ends a route instead of leaving her in mid-air when what she stands on goes away (search opened, page scrolled).
@@ -113,18 +115,47 @@
         } },
     ];
   }
-  // Moving along a surface (walking, or skipping: a run of small hops), and standing still.
-  const move = (set, fps, path, secs) => ({ d: secs, run: (t, e) => { const p = path(t); place(set, loop(set, e, fps), p.x, p.y); } });
+  // Moving along a surface, with her feet locked to it. Walking: one 16-frame cycle carries her WALK_STRIDE pixels,
+  // so the distance sets the number of steps. Skipping: she only moves forward while her feet are off the ground
+  // (meta.air says how airborne each frame is). `end` makes the last frame the one that leads smoothly into the next
+  // move (meta.endOn), `start` picks the first frame that follows smoothly from the last one (meta.startAt).
+  const WALK_STRIDE = 40, WALK_FPS = 18, SKIP_CYCLE = 60, SKIP_FPS = 30;
+  function move(set, path, { end = null, start = 0 } = {}) {
+    const skip = set.startsWith("skip"), mod = (i) => ((i % N(set)) + N(set)) % N(set);
+    let plan;
+    return {
+      d: () => {
+        const a = path(0), z = path(1), dist = Math.hypot(z.x - a.x, z.y - a.y);
+        if (!skip) {
+          const frames = dist / (WALK_STRIDE / N(set));
+          plan = { frames, first: end != null ? mod(end - Math.floor(frames)) : start };
+          return frames / WALK_FPS;
+        }
+        const air = meta.air[set], sum = air.reduce((x, y) => x + y, 0), adv = (i) => (air[mod(i)] / sum) * SKIP_CYCLE;
+        let k = 0, got = 0;
+        while (got < dist) { got += adv(end != null ? end - k : start + k); k++; }
+        const first = end != null ? end - k + 1 : start, cum = [0];
+        for (let i = 0; i < k; i++) cum.push(cum[i] + adv(first + i));
+        plan = { first, k, cum };
+        return k / SKIP_FPS;
+      },
+      run: (t, e) => {
+        if (!skip) { const fr = e * WALK_FPS, p = path(Math.min(1, fr / plan.frames)); place(set, mod(plan.first + Math.floor(fr)), p.x, p.y); return; }
+        const fr = e * SKIP_FPS, i = Math.min(plan.k - 1, Math.floor(fr));
+        const done = plan.cum[i] + (fr - i) * (plan.cum[i + 1] - plan.cum[i]), p = path(Math.min(1, done / plan.cum[plan.k]));
+        place(set, mod(plan.first + i), p.x, p.y);
+      },
+    };
+  }
   const still = (set, n, secs, at, from = 0) => ({ d: secs, run: (t) => { const p = at(); place(set, from + t * n, p.x, p.y); } });
 
   // ------------------------------------------------------------ home routes (one picked at random per app open)
   const REST = 40; // where she says bye: near the bar's left end, in bar units (the bar is 390 wide)
   const hopOn = () => airborne("skipR", () => { const n = need(ledge()); return { x: -W, y: n.y + 34 }; }, () => { const n = need(ledge()); return { x: n.x0, y: n.y }; }, 70);
-  const alongBar = (b, a, z, skip) => skip
-    ? move("skipL", 30, (t) => b.at(a + (z - a) * t), (a - z) / 75)
-    : move("walkL", 18, (t) => b.at(a + (z - a) * t), (a - z) / 48);
+  const alongBar = (b, a, z, skip, o = {}) => move(skip ? "skipL" : "walkL", (t) => b.at(a + (z - a) * t), o);
+  const fromLand = (skip) => ({ start: skip ? 0 : meta.startAt.walkLAfterLand }), intoStop = (skip) => ({ end: meta.endOn[skip ? "skipL" : "walkL"] });
   const overButton = (b) => airborne("skipL", () => b.at(262), () => b.at(128), 60);
-  const sayBye = (b) => [still("stopL", 11, 0.45, () => b.at(REST)), still("byeL", meta.frames.byeL, 1.6, () => b.at(REST))];
+  const sayBye = (b) => [still("stopL", 11, 0.45, () => b.at(REST)), still("byeL", N("byeL"), 1.6, () => b.at(REST))];
   const walkOff = (b) => alongBar(b, REST, -b.off, false);
 
   function homeRoute(b, l, newDrop) {
@@ -134,33 +165,39 @@
       // Banner, a jump down to the bar, over the save button, bye, off the left edge. Skipping when a price dropped.
       const skip = pick === "skip", dist = Math.max(0, Math.min(l.x1, l.x0 + 230) - l.x0);
       const on = (t) => { const n = need(ledge()); return { x: n.x0 + dist * t, y: n.y }; }, top = () => on(1);
-      return [...hopOn(), skip ? move("skipR", 30, on, dist / 95) : move("walkR", 18, on, dist / 62),
+      return [...hopOn(), move(skip ? "skipR" : "walkR", on, { start: skip ? 0 : meta.startAt.walkRAfterLand, end: meta.endOn[skip ? "skipR" : "walkR"] }),
         still("stopR", 11, 0.45, top), still("stopR", 0, 0.4, top, 10), // at the edge she stops and looks down
         ...airborne("skipR", top, () => b.at(352), 34), still("turnL", 4, 0.18, () => b.at(352)),
-        alongBar(b, 352, 262, skip), ...overButton(b), alongBar(b, 128, REST, skip), ...sayBye(b), walkOff(b)];
+        alongBar(b, 352, 262, skip, { start: meta.startAt[skip ? "skipLAfterTurn" : "walkLAfterTurn"] }), ...overButton(b),
+        alongBar(b, 128, REST, skip, { ...fromLand(skip), ...intoStop(skip) }), ...sayBye(b), walkOff(b)];
     }
     if (pick === "peek") {
       // Hops on, walks halfway, looks around, then hops back off the left edge.
       const half = Math.max(40, (l.x1 - l.x0) * 0.5), at = (t) => { const n = need(ledge()); return { x: n.x0 + half * t, y: n.y }; };
-      return [...hopOn(), move("walkR", 18, at, half / 62), still("stopR", 11, 0.45, () => at(1)), still("idleR", meta.frames.idleR, 2.4, () => at(1)),
-        still("turnL", 4, 0.18, () => at(1)), move("walkL", 18, (t) => at(1 - t), half / 62),
+      return [...hopOn(), move("walkR", at, { start: meta.startAt.walkRAfterLand, end: meta.endOn.walkR }), still("stopR", 11, 0.45, () => at(1)),
+        still("idleR", N("idleR"), 2.4, () => at(1)), still("turnL", 4, 0.18, () => at(1)), move("walkL", (t) => at(1 - t), { start: meta.startAt.walkLAfterTurn }),
         ...airborne("skipL", () => at(0), () => { const n = need(ledge()); return { x: -W, y: n.y + 40 }; }, 40)];
     }
     // "front" and "bar": in from the right along the bar; "front" also walks toward you before saying bye.
-    const steps = [alongBar(b, 390 + b.off, 262, false), ...overButton(b), alongBar(b, 128, REST, false)];
+    const steps = [alongBar(b, 390 + b.off, 262, false), ...overButton(b), alongBar(b, 128, REST, false, { ...fromLand(false), ...(pick === "front" ? {} : intoStop(false)) })];
     if (pick === "front") steps.push(
       { d: 1.4, run: (t, e) => { const p = b.at(REST); place("frontL", loop("frontL", e, 18), p.x, p.y, 0, 1 + 0.12 * t, 1 + 0.12 * t); } },
       { d: 0.3, run: (t) => { const p = b.at(REST), k = 1.12 - 0.12 * t; place("frontL", 0, p.x, p.y, 0, k, k); } });
     return [...steps, ...sayBye(b), walkOff(b)];
   }
   // After a save: she skips across the bottom bar, right to left, over the save button.
-  const savedRoute = (b) => [alongBar(b, 390 + b.off, 262, true), ...overButton(b), alongBar(b, 128, -b.off, true)];
-  // A search found nothing: she jumps onto the "Nothing matches" box, wags her finger, and hops off.
+  const savedRoute = (b) => [alongBar(b, 390 + b.off, 262, true), ...overButton(b), alongBar(b, 128, -b.off, true, fromLand(true))];
+  // A search found nothing: she hops up onto the search bar from the right edge, walks along it to the middle,
+  // stops, wags her finger, then walks on to the left end and hops down off the screen.
   function noRoute() {
-    const box = () => need(rectOf("#grid .empty")), spot = () => { const r = box(); return { x: r.right - 48, y: r.top }; };
-    return [...airborne("skipL", () => ({ x: innerWidth + W, y: box().top + 30 }), spot, 70),
-      still("stopL", 11, 0.3, spot), still("byeL", meta.frames.byeL, 1.6, spot),
-      ...airborne("skipL", spot, () => ({ x: -W, y: box().top + 60 }), 40)];
+    const r = () => need(rectOf("#searchIn"));
+    const at = (f) => () => { const q = r(); return { x: q.left + q.width * f, y: q.top }; };
+    const along = (f0, f1) => (t) => at(f0 + (f1 - f0) * t)();
+    return [...airborne("skipL", () => ({ x: innerWidth + W * 0.6, y: r().top + 26 }), at(0.9), 44),
+      move("walkL", along(0.9, 0.58), { start: meta.startAt.walkLAfterLand, end: meta.endOn.walkL }),
+      still("stopL", 11, 0.45, at(0.58)), still("byeL", N("byeL"), 1.55, at(0.58)),
+      move("walkL", along(0.58, 0.06)),
+      ...airborne("skipL", at(0.06), () => ({ x: -W, y: r().top + 70 }), 26)];
   }
   // A screenshot is being read: she hops onto the status line and skips in place until it's done, then skips off.
   let readSpot = null; // the status line hides itself when reading ends, so remember where she stood
@@ -174,7 +211,7 @@
   }
 
   // ------------------------------------------------------------ running a route
-  let playing = null;
+  let playing = null, endedAt = Date.now();
   // `where` says where she belongs; leaving it ends the route. A step can end it early by throwing, and then
   // `after` (if given) supplies a closing bit to play instead.
   function run(name, steps, where, after) {
@@ -183,7 +220,7 @@
     el.hidden = false;
     el.style.pointerEvents = "auto";
     let i = 0, t0 = performance.now(), d = null;
-    const stop = () => { if (playing === me) { el.hidden = true; shade.style.opacity = 0; playing = null; el.style.pointerEvents = "none"; } };
+    const stop = () => { if (playing === me) { el.hidden = true; shade.style.opacity = 0; playing = null; el.style.pointerEvents = "none"; endedAt = Date.now(); } };
     const tick = (now) => {
       if (playing !== me) return; // replaced by another route
       if (!where() || document.hidden) { stop(); return; }
@@ -226,6 +263,33 @@
       } else if (Date.now() - begin < 30000) setTimeout(ready, 400);
     };
     setTimeout(ready, 900);
+    // While the app is open she drops by now and then: every minute or so, once you've stopped scrolling and tapping
+    // for a few seconds. On the home screen she can take any route; on the other tabs she comes along the bottom bar.
+    let touchedAt = 0, gap = rand(35, 70) * 1000;
+    for (const t of ["pointerdown", "scroll", "keydown"]) addEventListener(t, () => { touchedAt = Date.now(); }, { passive: true, capture: true });
+    const tabShown = () => ["view-drops", "view-gone"].find(shown);
+    setInterval(() => {
+      if (playing || document.hidden || Date.now() - endedAt < gap || Date.now() - touchedAt < 4000 || document.querySelector(".wr-zoom-img")) return;
+      const b = bar();
+      if (!b) return;
+      if (onHome()) {
+        const l = scrollY < 40 && document.querySelector("#banner .slide") ? ledge() : null;
+        run("home", homeRoute(b, l, false), onHome);
+      } else if (tabShown()) {
+        const tab = tabShown();
+        run("visit", homeRoute(b, null, false), () => shown(tab));
+      } else return;
+      gap = rand(35, 70) * 1000;
+    }, 3000);
+    // Coming back to the app after a while (Android keeps it open in the background) counts as opening it again.
+    let lastWalk = Date.now(), away = 0;
+    document.addEventListener("visibilitychange", () => {
+      if (document.hidden) { away = Date.now(); return; }
+      if (away && Date.now() - away > 60000 && Date.now() - lastWalk > 120000) setTimeout(() => {
+        const b = bar();
+        if (!playing && b && onHome() && scrollY < 40 && document.querySelector("#banner .slide")) { lastWalk = Date.now(); run("home", homeRoute(b, ledge(), false), onHome); }
+      }, 700);
+    });
 
     // Reading a screenshot, and the save that follows it.
     let savedPending = false;
@@ -248,19 +312,19 @@
       const empty = grid.querySelector(".empty h3");
       if (!empty || !/Nothing matches/.test(empty.textContent) || !shown("view-home") || Date.now() - noAt < 10000 || playing?.name === "no") return;
       noAt = Date.now();
-      setTimeout(() => { if (rectOf("#grid .empty")) run("no", noRoute(), () => shown("view-home") && !!rectOf("#grid .empty")); }, 350);
+      setTimeout(() => { if (rectOf("#grid .empty") && rectOf("#searchIn")) run("no", noRoute(), () => shown("view-home") && !!rectOf("#searchIn")); }, 350);
     }).observe(grid, { childList: true });
   }
 
   async function start() {
     try { meta = await (await fetch(BASE + "girl.json")).json(); } catch { return; }
-    W = meta.w * SCALE; H = meta.h * SCALE; FX = meta.feetX * SCALE; FY = meta.feetY * SCALE;
+    W = meta.w * meta.scale; H = meta.h * meta.scale; FX = meta.feetX * meta.scale; FY = meta.feetY * meta.scale;
     el = document.createElement("div");
     el.className = "wr-girl";
     el.hidden = true;
     el.setAttribute("aria-hidden", "true");
     Object.assign(el.style, { position: "fixed", left: "0", top: "0", width: W + "px", height: H + "px", zIndex: "11",
-      backgroundRepeat: "no-repeat", transformOrigin: `${FX}px ${FY}px`, pointerEvents: "none", willChange: "transform", touchAction: "manipulation" });
+      backgroundRepeat: "no-repeat", backgroundImage: `url(${BASE}girl.png)`, backgroundSize: `${meta.cols * W}px ${meta.rows * H}px`, transformOrigin: `${FX}px ${FY}px`, pointerEvents: "none", willChange: "transform", touchAction: "manipulation" });
     // Tap her and she hops (a small extra jump on top of what she's doing), with a puff of dust as she lands.
     el.addEventListener("click", (e) => {
       e.stopPropagation();
@@ -272,8 +336,10 @@
     Object.assign(shade.style, { position: "fixed", left: "0", top: "0", width: "32px", height: "8px", borderRadius: "50%", zIndex: "11",
       pointerEvents: "none", opacity: "0", background: "radial-gradient(closest-side, rgba(0,0,0,.32), rgba(0,0,0,0))" });
     document.body.append(shade, el);
-    const ok = await Promise.all(Object.keys(meta.frames).map((n) => new Promise((res) => { const im = new Image(); im.onload = () => res(true); im.onerror = () => res(false); im.src = BASE + n + ".png"; })));
-    if (ok.includes(false)) return; // offline without her pictures: skip this time
+    const sheet = new Image();
+    sheet.src = BASE + "girl.png";
+    try { await sheet.decode(); } catch { return; } // offline without her pictures: skip this time
+    window.__wrGirlSheet = sheet; // keeps the decoded picture alive
     watch();
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", start); else start();

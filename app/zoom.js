@@ -3,15 +3,15 @@
 // Opt an image out with data-nozoom (the crop editor already is, via .crop).
 (() => {
   "use strict";
-  const HOLD_MS = 350, MOVE_PX = 10, EASE = "cubic-bezier(.2, .8, .2, 1)";
+  const HOLD_MS = 350, MOVE_PX = 10, OPEN = "cubic-bezier(.22, 1, .36, 1)", SHUT = "cubic-bezier(.4, 0, .2, 1)";
   const reduce = matchMedia("(prefers-reduced-motion: reduce)");
-  const ms = () => (reduce.matches ? 0 : 280);
+  const ms = (n) => (reduce.matches ? 0 : n);
 
   const style = document.createElement("style");
   style.textContent = `
     img { -webkit-touch-callout: none; -webkit-user-drag: none; }
     .wr-zoom-shade { position: fixed; inset: 0; z-index: 9999; background: rgba(9, 12, 26, .78); opacity: 0; touch-action: none; }
-    .wr-zoom-img { position: fixed; z-index: 10000; object-fit: cover; border-radius: 12px; box-shadow: 0 24px 60px rgba(0, 0, 0, .45); pointer-events: none; will-change: left, top, width, height; }`;
+    .wr-zoom-img { position: fixed; z-index: 10000; pointer-events: none; transform-origin: 50% 50%; will-change: transform, clip-path; }`;
   document.head.append(style);
 
   let timer = 0, start = null, target = null, zoom = null, swallowClick = false;
@@ -21,42 +21,51 @@
     if (!img || img.closest("[data-nozoom], .crop") || !img.complete || !img.naturalWidth) return null;
     return img.getBoundingClientRect().width >= 80 ? img : null;
   };
-  const place = (el, r, radius) => Object.assign(el.style, { left: r.left + "px", top: r.top + "px", width: r.width + "px", height: r.height + "px", borderRadius: radius });
+  // The big photo sits at its final size the whole time; the animation only scales and crops it (transform and
+  // clip-path), which the phone's graphics chip handles smoothly. "card" makes it look exactly like the photo in its
+  // card: scaled down to cover the card and cropped to the card's shape and corners.
+  function card(to, from, radius) {
+    const s = Math.max(from.width / to.width, from.height / to.height);
+    const dx = from.left + from.width / 2 - (to.left + to.width / 2), dy = from.top + from.height / 2 - (to.top + to.height / 2);
+    const ix = Math.max(0, (to.width - from.width / s) / 2), iy = Math.max(0, (to.height - from.height / s) / 2);
+    return { transform: `translate(${dx}px, ${dy}px) scale(${s})`, clipPath: `inset(${iy}px ${ix}px round ${(parseFloat(radius) || 0) / s}px)` };
+  }
+  const full = { transform: "translate(0px, 0px) scale(1)", clipPath: "inset(0px 0px round 14px)" };
 
-  function open(img) {
-    const from = img.getBoundingClientRect();
+  async function open(img) {
+    const from = img.getBoundingClientRect(), radius = getComputedStyle(img).borderRadius;
     const nw = img.naturalWidth, nh = img.naturalHeight;
     const k = Math.min((innerWidth * 0.92) / nw, (innerHeight * 0.82) / nh);
-    const w = nw * k, h = nh * k;
-    const to = { left: (innerWidth - w) / 2, top: (innerHeight - h) / 2, width: w, height: h };
+    const to = { left: (innerWidth - nw * k) / 2, top: (innerHeight - nh * k) / 2, width: nw * k, height: nh * k };
     const shade = document.createElement("div");
     shade.className = "wr-zoom-shade";
     const big = document.createElement("img");
     big.className = "wr-zoom-img";
-    big.src = img.currentSrc || img.src;
     big.alt = img.alt || "";
-    place(big, from, getComputedStyle(img).borderRadius);
-    document.body.append(shade, big);
-    big.getBoundingClientRect(); // commit the start position so the change below animates
-    const t = `${ms()}ms ${EASE}`;
-    shade.style.transition = `opacity ${t}`;
-    big.style.transition = `left ${t}, top ${t}, width ${t}, height ${t}, border-radius ${t}`;
-    shade.style.opacity = "1";
-    place(big, to, "14px");
-    img.style.visibility = "hidden"; // the photo appears to lift out of its card
-    zoom = { img, shade, big };
+    big.src = img.currentSrc || img.src;
+    Object.assign(big.style, { left: to.left + "px", top: to.top + "px", width: to.width + "px", height: to.height + "px" }, card(to, from, radius));
+    zoom = { img, shade, big, to, radius };
     swallowClick = true;
     navigator.vibrate?.(8);
+    try { await big.decode(); } catch {} // already downloaded; decoding first avoids a stutter on the first frame
+    if (!zoom || zoom.big !== big) return; // let go while decoding
+    document.body.append(shade, big);
+    img.style.visibility = "hidden"; // the photo appears to lift out of its card
+    zoom.anim = big.animate([card(to, from, radius), full], { duration: ms(340), easing: OPEN, fill: "forwards" });
+    zoom.fade = shade.animate([{ opacity: 0 }, { opacity: 1 }], { duration: ms(300), easing: "linear", fill: "forwards" });
   }
 
   function close() {
     if (!zoom) return;
-    const { img, shade, big } = zoom;
+    const { img, shade, big, to, radius, anim, fade } = zoom;
     zoom = null;
-    place(big, img.getBoundingClientRect(), getComputedStyle(img).borderRadius); // back to wherever the card is now
-    shade.style.opacity = "0";
-    setTimeout(() => { img.style.visibility = ""; shade.remove(); big.remove(); }, ms() + 20);
-    setTimeout(() => { swallowClick = false; }, ms() + 400);
+    const done = () => { img.style.visibility = ""; shade.remove(); big.remove(); };
+    setTimeout(() => { swallowClick = false; }, ms(260) + 400);
+    if (!anim) { done(); return; } // let go before it even opened
+    if (anim.playState === "running") { anim.reverse(); fade.reverse(); anim.onfinish = done; return; } // still growing: shrink back the same way
+    const back = big.animate([full, card(to, img.getBoundingClientRect(), radius)], { duration: ms(260), easing: SHUT, fill: "forwards" });
+    shade.animate([{ opacity: 1 }, { opacity: 0 }], { duration: ms(240), easing: "linear", fill: "forwards" });
+    back.onfinish = done;
   }
 
   function cancelHold() { clearTimeout(timer); timer = 0; start = null; target = null; }
