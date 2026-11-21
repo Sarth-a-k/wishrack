@@ -15,7 +15,7 @@ run_worker_first = ["/api/*", "/share"]
 [[d1_databases]]
 binding = "DB"
 database_name = "wishrack"
-database_id = "REPLACE_WITH_YOUR_DATABASE_ID"
+database_id = "56d61206-203f-4608-aaa2-1117b467094d"
 
 # Re-check saved prices once a day (08:00 India time).
 [triggers]
