@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Android 12+ always shows a short system launch screen first; keep it forest green so it blends into ours. -->
+    <style name="Wishrack" parent="@android:style/Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@color/icon_bg</item>
+        <item name="android:statusBarColor">@color/icon_bg</item>
+        <item name="android:navigationBarColor">@color/icon_bg</item>
+        <item name="android:windowSplashScreenBackground">@color/icon_bg</item>
+    </style>
+</resources>

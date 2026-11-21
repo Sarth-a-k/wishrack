@@ -1,0 +1,387 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wishrack, design C preview</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap">
+<style>
+/* Design C preview: the owner's reference screenshot (forest green, mint, sage chips, rounded product cards,
+   curved bottom bar with a raised centre button) applied to Wishrack's real screens and saved items.
+   Garment drawings are sample art standing in for product photos, which come from the owner's screenshots. */
+:root {
+  --forest: #12493b;      /* deep green: banner, card footers, active chip, headings */
+  --forest-2: #1d5c4b;
+  --mint: #eaf4ef;        /* page wash */
+  --mint-2: #dcebe3;      /* card photo ground */
+  --sage: #a9c9ad;        /* inactive chips */
+  --sage-ink: #24503f;
+  --ink: #13241e;
+  --ink-2: #5e7069;
+  --white: #ffffff;
+  --sale: #c2413b;
+  --drop: #2f8a4c;
+  --online: #34c759;
+  --shadow: 0 14px 30px -16px rgba(18, 73, 59, .45);
+  --font: "Poppins", system-ui, sans-serif;
+}
+* { box-sizing: border-box; }
+body { margin: 0; font: 14px/1.4 var(--font); color: var(--ink); background: #cfd8d4; }
+.page { max-width: 1340px; margin: 0 auto; padding: 28px 20px 48px; }
+.page > header h1 { margin: 0 0 4px; font-size: 22px; font-weight: 600; }
+.page > header p { margin: 0 0 22px; color: #45524d; max-width: 70ch; }
+.phones { display: flex; flex-wrap: wrap; gap: 28px; justify-content: center; align-items: flex-start; }
+figure { margin: 0; display: grid; gap: 10px; justify-items: center; }
+figcaption { font-size: 13px; color: #45524d; font-weight: 500; }
+
+/* phone frame */
+.phone { width: 390px; height: 844px; border-radius: 44px; background: var(--white); position: relative; overflow: hidden;
+  box-shadow: 0 0 0 10px #0f1512, 0 30px 60px -20px rgba(0,0,0,.45); }
+.screen { position: absolute; inset: 0; overflow-y: auto; scrollbar-width: none; background: linear-gradient(180deg, var(--mint) 0, #f6faf8 340px, #fff 620px); padding-bottom: 120px; }
+.screen::-webkit-scrollbar { display: none; }
+.status { height: 44px; display: flex; justify-content: space-between; align-items: center; padding: 0 28px; font-size: 14px; font-weight: 600; }
+.status i { display: inline-block; width: 22px; height: 11px; border: 1.5px solid var(--ink); border-radius: 3px; position: relative; }
+.status i::after { content: ""; position: absolute; inset: 1.5px 5px 1.5px 1.5px; background: var(--ink); border-radius: 1px; }
+
+/* top row */
+.top { display: flex; align-items: center; justify-content: space-between; padding: 6px 20px 0; }
+.circle { width: 44px; height: 44px; border-radius: 50%; background: var(--white); display: grid; place-items: center; border: 0; color: var(--ink); box-shadow: 0 6px 16px -10px rgba(18,73,59,.5); }
+.top-right { display: flex; gap: 12px; align-items: center; }
+.avatar { position: relative; width: 44px; height: 44px; border-radius: 50%; background: var(--forest); color: var(--white); display: grid; place-items: center; font-weight: 600; font-size: 15px; }
+.avatar::after { content: ""; position: absolute; top: 1px; right: 1px; width: 10px; height: 10px; border-radius: 50%; background: var(--online); border: 2px solid var(--mint); }
+.badge { position: absolute; top: -2px; right: -2px; min-width: 18px; height: 18px; border-radius: 9px; background: var(--forest); color: #fff; font-size: 10.5px; font-weight: 600; display: grid; place-items: center; padding: 0 4px; }
+
+.hello { padding: 16px 20px 0; margin: 0; font-size: 27px; line-height: 1.18; font-weight: 700; letter-spacing: -.01em; max-width: 300px; }
+
+/* banner */
+.banner { position: relative; margin: 54px 20px 0; height: 150px; border-radius: 22px; background: var(--forest); color: var(--white); padding: 20px 146px 0 34px; box-shadow: var(--shadow); }
+.banner h2 { margin: 0 0 6px; font-size: 17px; font-weight: 600; }
+.banner p { margin: 0; font-size: 11.5px; line-height: 1.45; color: #cfe3d9; }
+.banner p b { color: #fff; font-weight: 600; }
+.banner .art { position: absolute; right: 18px; bottom: 0; width: 132px; height: 190px; display: grid; place-items: end center; }
+.banner .art svg { width: 120px; height: auto; filter: drop-shadow(0 14px 14px rgba(0,0,0,.28)); }
+.banner .tag { position: absolute; right: 14px; top: 12px; background: #fff; color: var(--drop); font-size: 11px; font-weight: 700; padding: 4px 9px; border-radius: 999px; }
+.arrow { position: absolute; top: 50%; margin-top: -12px; width: 24px; height: 24px; display: grid; place-items: center; color: #fff; opacity: .9; }
+.arrow.l { left: 2px; } .arrow.r { right: 2px; }
+.dots { position: absolute; left: 34px; bottom: 16px; display: flex; gap: 5px; }
+.dots i { width: 6px; height: 6px; border-radius: 50%; background: #6f9b8b; }
+.dots i:first-child { background: #fff; width: 6px; }
+
+/* chips */
+.chips { display: flex; gap: 8px; padding: 22px 20px 4px; overflow-x: auto; scrollbar-width: none; }
+.chips::-webkit-scrollbar { display: none; }
+.chip { flex: none; height: 38px; padding: 0 16px; border-radius: 12px; border: 0; background: var(--sage); color: var(--sage-ink); font: 500 13px var(--font); display: inline-flex; align-items: center; gap: 6px; }
+.chip.on { background: var(--forest); color: #fff; }
+.chip.icon { width: 38px; padding: 0; justify-content: center; background: #fff; color: var(--ink); box-shadow: 0 6px 16px -10px rgba(18,73,59,.5); }
+
+/* product cards */
+.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; padding: 18px 20px 0; }
+.card { border-radius: 22px; overflow: hidden; background: var(--forest); position: relative; box-shadow: var(--shadow); }
+.card .panel { background: var(--mint-2); border-radius: 22px 22px 26px 26px; overflow: hidden; position: relative; }
+.card .pic { height: 150px; display: grid; place-items: end center; background: radial-gradient(120% 90% at 50% 15%, #f4faf7 0, var(--mint-2) 70%); position: relative; }
+.card .pic svg { width: 96px; height: auto; margin-bottom: -6px; filter: drop-shadow(0 10px 10px rgba(18,73,59,.22)); }
+.card .body { padding: 14px 12px 16px; background: var(--mint-2); }
+.card .store { font-size: 11px; color: var(--ink-2); }
+.card .name { font-size: 14.5px; font-weight: 600; color: var(--forest); line-height: 1.25; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: 36px; }
+.card .foot { background: var(--forest); color: #fff; padding: 12px 10px 12px 12px; display: flex; align-items: center; justify-content: space-between; gap: 6px; }
+.card .price { font-weight: 600; font-size: 15px; font-variant-numeric: tabular-nums; line-height: 1.1; }
+.card .price s { display: block; font-size: 10.5px; font-weight: 400; color: #a9cbbd; }
+.go { width: 30px; height: 30px; border-radius: 50%; background: #fff; color: var(--forest); display: grid; place-items: center; flex: none; }
+.flag { position: absolute; left: 10px; top: 10px; background: #fff; color: var(--drop); font-size: 10.5px; font-weight: 600; border-radius: 999px; padding: 3px 8px; display: flex; align-items: center; gap: 3px; }
+.flag.sale { color: var(--sale); }
+
+.section-title { display: flex; justify-content: space-between; align-items: baseline; padding: 28px 20px 0; }
+.section-title h3 { margin: 0; font-size: 19px; font-weight: 600; }
+.section-title a { font-size: 12.5px; color: var(--forest); font-weight: 600; text-decoration: none; }
+.row { display: flex; gap: 12px; padding: 14px 20px 0; overflow-x: auto; scrollbar-width: none; }
+.row::-webkit-scrollbar { display: none; }
+.wide { flex: none; width: 230px; height: 104px; border-radius: 20px; background: var(--forest); color: #fff; display: flex; align-items: center; gap: 4px; overflow: visible; position: relative; box-shadow: var(--shadow); }
+.wide .pic { width: 92px; height: 104px; display: grid; place-items: end center; }
+.wide .pic svg { width: 78px; margin-bottom: -2px; }
+.wide .store { font-size: 11px; color: #a9cbbd; }
+.wide .name { font-size: 14px; font-weight: 600; line-height: 1.25; }
+.wide .price { font-size: 13px; margin-top: 4px; }
+.wide { width: 250px; }
+.wide .txt { flex: 1; min-width: 0; padding-right: 10px; }
+.wide .name { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.state { display: inline-flex; align-items: center; gap: 3px; font-size: 10px; font-weight: 600; border-radius: 999px; padding: 2px 8px 2px 6px; margin-bottom: 4px; }
+.state.bought { background: #fff; color: var(--forest); }
+.state.removed { background: rgba(255,255,255,.16); color: #e3efe9; }
+.wide.removed .pic { opacity: .55; }
+.wide.removed .name, .wide.removed .price { color: #cfe3d9; }
+.undo { position: absolute; right: 10px; bottom: 10px; height: 26px; padding: 0 10px; border-radius: 999px; background: var(--sage); color: var(--forest); font-size: 10.5px; font-weight: 600; display: inline-flex; align-items: center; }
+
+/* bottom bar with curved notch */
+.tabbar { position: absolute; left: 0; right: 0; bottom: 0; height: 124px; pointer-events: none; }
+.tabbar svg.bg { position: absolute; inset: 0; width: 100%; height: 100%; filter: drop-shadow(0 -8px 18px rgba(18,73,59,.12)); }
+.tabs { position: absolute; left: 0; right: 0; bottom: 20px; display: grid; grid-template-columns: 1fr 1fr 96px 1fr 1fr; align-items: center; justify-items: center; }
+.tab { color: #8aa198; display: grid; justify-items: center; gap: 3px; font-size: 10px; font-weight: 500; }
+.tab.on { color: var(--forest); }
+.tab.on::after { content: ""; width: 4px; height: 4px; border-radius: 50%; background: var(--forest); }
+.fab { position: absolute; left: 50%; bottom: 52px; margin-left: -31px; width: 62px; height: 62px; border-radius: 50%; background: #fff; display: grid; place-items: center; box-shadow: 0 10px 22px -8px rgba(18,73,59,.45); }
+.fab span { width: 48px; height: 48px; border-radius: 50%; background: var(--forest); color: #fff; display: grid; place-items: center; }
+
+/* item sheet screen */
+.hero { margin: 8px 20px 0; height: 300px; border-radius: 28px; background: radial-gradient(110% 80% at 50% 25%, #f7fbf9 0, var(--mint-2) 75%); display: grid; place-items: end center; position: relative; overflow: hidden; }
+.hero svg.g { width: 190px; margin-bottom: -8px; filter: drop-shadow(0 16px 16px rgba(18,73,59,.25)); }
+.hero .sample { position: absolute; left: 14px; bottom: 12px; font-size: 10px; color: var(--ink-2); background: rgba(255,255,255,.7); padding: 2px 7px; border-radius: 6px; }
+.detail { padding: 18px 20px 0; }
+.detail .store { font-size: 12px; color: var(--ink-2); }
+.detail h2 { margin: 2px 0 0; font-size: 22px; line-height: 1.2; color: var(--forest); font-weight: 700; }
+.pricebox { display: flex; align-items: baseline; gap: 10px; margin-top: 10px; }
+.pricebox b { font-size: 26px; font-weight: 700; }
+.pricebox s { color: var(--ink-2); font-size: 13px; }
+.pricebox span { color: var(--sale); font-weight: 600; font-size: 13px; }
+.was { margin-top: 4px; color: var(--drop); font-size: 12.5px; font-weight: 600; }
+.pills { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
+.pill { background: #fff; border-radius: 12px; padding: 8px 12px; font-size: 12px; box-shadow: 0 6px 16px -12px rgba(18,73,59,.6); }
+.pill small { display: block; color: var(--ink-2); font-size: 10.5px; }
+.history { margin: 18px 20px 0; background: #fff; border-radius: 20px; padding: 16px; box-shadow: var(--shadow); }
+.history h4 { margin: 0 0 10px; font-size: 14px; font-weight: 600; }
+.bars { display: flex; align-items: flex-end; gap: 8px; height: 90px; }
+.bars i { flex: 1; border-radius: 8px 8px 4px 4px; background: var(--sage); }
+.bars i.down { background: var(--forest); }
+.bars i.up { background: #e8b4ae; }
+.axis { display: flex; justify-content: space-between; font-size: 10.5px; color: var(--ink-2); margin-top: 6px; }
+.cta { position: absolute; left: 0; right: 0; bottom: 0; padding: 26px 20px 28px; display: flex; gap: 10px; background: linear-gradient(180deg, rgba(255,255,255,0), #fff 34%); }
+.btn { height: 54px; border-radius: 18px; border: 0; font: 600 15px var(--font); display: flex; align-items: center; justify-content: center; gap: 8px; }
+.btn.primary { flex: 1; background: var(--forest); color: #fff; box-shadow: var(--shadow); }
+.btn.square { width: 54px; background: #fff; color: var(--forest); box-shadow: 0 6px 16px -10px rgba(18,73,59,.6); }
+
+/* save / review screen */
+.title-row { display: flex; align-items: center; gap: 12px; padding: 6px 20px 0; }
+.title-row h2 { margin: 0; font-size: 19px; font-weight: 600; }
+.drop { margin: 18px 20px 0; border-radius: 24px; background: var(--forest); color: #fff; padding: 18px; display: grid; gap: 12px; }
+.drop p { margin: 0; color: #cfe3d9; font-size: 12px; }
+.input { height: 50px; border-radius: 16px; background: #fff; color: var(--ink-2); display: flex; align-items: center; padding: 0 6px 0 16px; justify-content: space-between; font-size: 13.5px; }
+.input .btn { height: 38px; padding: 0 16px; border-radius: 12px; background: var(--sage); color: var(--forest); font-size: 13px; }
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.two .btn { height: 46px; border-radius: 14px; background: var(--forest-2); color: #fff; font-size: 12.5px; }
+.review { margin: 18px 20px 0; background: #fff; border-radius: 24px; padding: 14px; box-shadow: var(--shadow); display: grid; grid-template-columns: 120px 1fr; gap: 14px; }
+.crop { height: 190px; border-radius: 16px; background: #fff; border: 1px solid #e0ebe5; position: relative; overflow: hidden; }
+.crop .shot { position: absolute; inset: 0; padding: 8px; font-size: 7px; color: #555; }
+.crop .shot div { height: 104px; margin-top: 10px; border-radius: 4px; background: #8a8f6a; }
+.crop .box { position: absolute; left: 10px; top: 22px; right: 10px; height: 110px; border: 2px solid var(--forest); border-radius: 6px; box-shadow: 0 0 0 999px rgba(18,73,59,.45); }
+.crop .box i { position: absolute; width: 12px; height: 12px; border-radius: 50%; background: #fff; border: 2.5px solid var(--forest); }
+.crop .box i:nth-child(1) { left: -7px; top: -7px; } .crop .box i:nth-child(2) { right: -7px; top: -7px; }
+.crop .box i:nth-child(3) { left: -7px; bottom: -7px; } .crop .box i:nth-child(4) { right: -7px; bottom: -7px; }
+.fields { display: grid; gap: 8px; align-content: start; }
+.field { display: grid; gap: 2px; }
+.field label { font-size: 10.5px; color: var(--ink-2); }
+.field div { height: 34px; border-radius: 10px; background: var(--mint); display: flex; align-items: center; padding: 0 10px; font-size: 12.5px; font-weight: 500; }
+.field.miss div { border: 1.5px dashed #e0a49e; background: #fff; color: var(--ink-2); font-weight: 400; }
+.field-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.read-by { font-size: 10.5px; color: var(--ink-2); }
+
+/* gate screen */
+.gate { position: absolute; inset: 0; background: var(--forest); color: #fff; display: grid; align-content: end; padding: 0 24px 46px; overflow: hidden; }
+.gate .glow { position: absolute; left: -60px; right: -60px; top: 90px; height: 380px; border-radius: 50%; background: radial-gradient(closest-side, #2b6e5a, transparent); }
+.gate .art { position: absolute; top: 120px; left: 0; right: 0; display: flex; justify-content: center; gap: 0; }
+.gate .art svg { width: 150px; filter: drop-shadow(0 20px 20px rgba(0,0,0,.3)); }
+.gate .art svg + svg { margin-left: -40px; margin-top: 50px; width: 120px; }
+.gate h2 { margin: 0; font-size: 30px; line-height: 1.15; font-weight: 700; position: relative; }
+.gate p { margin: 10px 0 22px; color: #cfe3d9; font-size: 13.5px; position: relative; }
+.gate .input { position: relative; height: 56px; padding: 0 6px 0 18px; letter-spacing: .3em; color: var(--ink); font-size: 18px; }
+.gate .input .btn { background: var(--forest); color: #fff; letter-spacing: 0; height: 44px; }
+
+.notes { max-width: 880px; margin: 34px auto 0; background: #fff; border-radius: 18px; padding: 18px 22px; font-size: 13.5px; color: #33423c; }
+.notes h2 { margin: 0 0 8px; font-size: 16px; }
+.notes ul { margin: 0; padding-left: 18px; display: grid; gap: 5px; }
+</style>
+</head>
+<body>
+<!-- Garment drawings: sample art for this preview only. Real cards show the photo cropped from your screenshot. -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="pants" viewBox="0 0 100 150"><path d="M22 6h56l6 136H58L50 52 42 142H16Z" fill="currentColor"/><path d="M22 6h56v12H22z" fill="#000" opacity=".18"/><path d="M50 18v30" stroke="#000" stroke-opacity=".2" stroke-width="1.5"/><path d="M30 24c4 6 10 8 14 6M70 24c-4 6-10 8-14 6" stroke="#000" stroke-opacity=".18" stroke-width="1.5" fill="none"/></symbol>
+    <symbol id="joggers" viewBox="0 0 100 150"><path d="M22 8h56l4 120-2 12H60l-1-10L50 54l-9 76-1 10H20l-2-12Z" fill="currentColor"/><path d="M22 8h56v12H22z" fill="#000" opacity=".16"/><path d="M20 130h20M60 130h20" stroke="#000" stroke-opacity=".22" stroke-width="5"/><path d="M47 20l-3 10M53 20l3 10" stroke="#fff" stroke-opacity=".7" stroke-width="1.5"/></symbol>
+    <symbol id="cardigan" viewBox="0 0 140 150"><path d="M46 8 58 4h24l12 4 26 12 14 76-16 4-10-50v96H36V50L26 100l-16-4 14-76Z" fill="currentColor"/><path d="M58 4l12 30 12-30" fill="none" stroke="#000" stroke-opacity=".25" stroke-width="2"/><path d="M70 34v112" stroke="#000" stroke-opacity=".3" stroke-width="2"/><path d="M36 136h68" stroke="#000" stroke-opacity=".18" stroke-width="8"/><g fill="#000" fill-opacity=".1"><path d="M40 60h4v70h-4zM50 60h4v70h-4zM86 60h4v70h-4zM96 60h4v70h-4z"/></g></symbol>
+    <symbol id="jacket" viewBox="0 0 140 150"><path d="M44 10 56 2h28l12 8 26 14 12 74-18 4-8-46v90H34V56l-8 46-18-4 12-74Z" fill="currentColor"/><path d="M56 2 70 22 84 2M56 2l-6 22 20 0M84 2l6 22-20 0" fill="#000" fill-opacity=".14"/><path d="M70 22v124" stroke="#000" stroke-opacity=".3" stroke-width="2.5"/><path d="M44 92h16M80 92h16" stroke="#000" stroke-opacity=".22" stroke-width="2.5"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="m20 20-4.4-4.4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+    <symbol id="i-bag" viewBox="0 0 24 24"><path d="M5.5 8h13l-1 12h-11Z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/><path d="M9 8V6.5a3 3 0 0 1 6 0V8" fill="none" stroke="currentColor" stroke-width="1.9"/></symbol>
+    <symbol id="i-filter" viewBox="0 0 24 24"><path d="M4 8h10M18 8h2M4 16h2M10 16h10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="16" cy="8" r="2" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="8" cy="16" r="2" fill="none" stroke="currentColor" stroke-width="2"/></symbol>
+    <symbol id="i-out" viewBox="0 0 24 24"><path d="M8 16 16 8M10 8h6v6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-left" viewBox="0 0 24 24"><path d="m14 6-6 6 6 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-right" viewBox="0 0 24 24"><path d="m10 6 6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-home" viewBox="0 0 24 24"><path d="M4 11 12 4l8 7v8.5a1 1 0 0 1-1 1h-4.5v-6h-5v6H5a1 1 0 0 1-1-1Z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/></symbol>
+    <symbol id="i-drop" viewBox="0 0 24 24"><path d="M4 6l6 6 4-4 6 6" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 14h5v-5" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-scan" viewBox="0 0 24 24"><path d="M4 9V6a2 2 0 0 1 2-2h3M15 4h3a2 2 0 0 1 2 2v3M20 15v3a2 2 0 0 1-2 2h-3M9 20H6a2 2 0 0 1-2-2v-3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M8 12h8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5 9.5 17 19 7.5" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.9"/><path d="M19.4 13.5a7.6 7.6 0 0 0 0-3l2-1.5-2-3.4-2.3 1a7.4 7.4 0 0 0-2.6-1.5L14 2.6h-4l-.5 2.5A7.4 7.4 0 0 0 6.9 6.6l-2.3-1-2 3.4 2 1.5a7.6 7.6 0 0 0 0 3l-2 1.5 2 3.4 2.3-1a7.4 7.4 0 0 0 2.6 1.5l.5 2.5h4l.5-2.5a7.4 7.4 0 0 0 2.6-1.5l2.3 1 2-3.4Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></symbol>
+    <symbol id="i-image" viewBox="0 0 24 24"><rect x="3.5" y="4.5" width="17" height="15" rx="3" fill="none" stroke="currentColor" stroke-width="1.9"/><circle cx="9" cy="10" r="1.8" fill="none" stroke="currentColor" stroke-width="1.9"/><path d="m4.5 17.5 5-5 4 4 2.5-2.5 3.5 3.5" fill="none" stroke="currentColor" stroke-width="1.9"/></symbol>
+    <symbol id="i-pen" viewBox="0 0 24 24"><path d="M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16v4Z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/></symbol>
+    <symbol id="i-heart" viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10Z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/></symbol>
+  </defs>
+</svg>
+
+<div class="page">
+<header>
+  <h1>Wishrack, design C: your green reference</h1>
+  <p>Your screenshot's look applied to Wishrack's real screens and your 7 saved items. Garment drawings are sample art: in the app, each card shows the photo cropped from your screenshot. Scroll inside each phone.</p>
+</header>
+
+<div class="phones">
+
+<!-- 1. HOME -->
+<figure>
+<div class="phone"><div class="screen">
+  <div class="status"><span>9:41</span><i></i></div>
+  <div class="top">
+    <span class="circle" aria-label="Search your rack"><svg width="20" height="20"><use href="#i-search"/></svg></span>
+    <div class="top-right">
+      <span class="circle" style="position:relative" aria-label="Bought"><svg width="20" height="20"><use href="#i-bag"/></svg><span class="badge">1</span></span>
+      <span class="avatar" aria-label="Settings">W</span>
+    </div>
+  </div>
+  <h1 class="hello">Get your favourite fits for less</h1>
+
+  <section class="banner" aria-label="Price drops">
+    <span class="art" aria-hidden="true"><svg viewBox="0 0 100 150" style="color:#7d8458"><use href="#pants"/></svg></span>
+    <span class="tag">↓ Rs. 100</span>
+    <h2>Price dropped</h2>
+    <p>Olive Faded Loose Fit Pants is now <b>Rs. 1,499</b> at Bonkers Corner, down from Rs. 1,599.</p>
+    <span class="arrow l"><svg width="18" height="18"><use href="#i-left"/></svg></span>
+    <span class="arrow r"><svg width="18" height="18"><use href="#i-right"/></svg></span>
+    <span class="dots"><i></i><i></i><i></i><i></i></span>
+  </section>
+
+  <div class="chips" role="tablist" aria-label="Store">
+    <span class="chip icon"><svg width="18" height="18"><use href="#i-filter"/></svg></span>
+    <span class="chip on">All</span><span class="chip">H&amp;M</span><span class="chip">Bonkers Corner</span><span class="chip">Uniqlo</span>
+  </div>
+
+  <div class="grid">
+    <article class="card">
+      <div class="panel"><div class="pic"><span class="flag">↓ Rs. 100</span><svg viewBox="0 0 100 150" style="color:#7d8458"><use href="#pants"/></svg></div>
+      <div class="body"><div class="store">Bonkers Corner</div><div class="name">Olive Faded Loose Fit Pants</div></div></div>
+      <div class="foot"><span class="price">Rs. 1,499<s>Rs. 1,799</s></span><span class="go"><svg width="16" height="16"><use href="#i-out"/></svg></span></div>
+    </article>
+    <article class="card">
+      <div class="panel"><div class="pic"><svg viewBox="0 0 140 150" style="color:#5f646b;width:112px"><use href="#cardigan"/></svg></div>
+      <div class="body"><div class="store">H&amp;M · Size M</div><div class="name">Rib-knit Zip-through Cardigan</div></div></div>
+      <div class="foot"><span class="price">Rs. 2,999</span><span class="go"><svg width="16" height="16"><use href="#i-out"/></svg></span></div>
+    </article>
+    <article class="card">
+      <div class="panel"><div class="pic"><span class="flag sale">7% off</span><svg viewBox="0 0 100 150" style="color:#9b8a72"><use href="#joggers"/></svg></div>
+      <div class="body"><div class="store">Bonkers Corner</div><div class="name">Taupe Everyday Joggers</div></div></div>
+      <div class="foot"><span class="price">Rs. 1,399<s>Rs. 1,499</s></span><span class="go"><svg width="16" height="16"><use href="#i-out"/></svg></span></div>
+    </article>
+    <article class="card">
+      <div class="panel"><div class="pic"><svg viewBox="0 0 140 150" style="color:#3d4148;width:112px"><use href="#jacket"/></svg></div>
+      <div class="body"><div class="store">Uniqlo</div><div class="name">Fleece Full-Zip Jacket</div></div></div>
+      <div class="foot"><span class="price">Rs. 2,490</span><span class="go"><svg width="16" height="16"><use href="#i-out"/></svg></span></div>
+    </article>
+  </div>
+
+  <div class="section-title"><h3>Bought &amp; removed</h3><a href="#">See all</a></div>
+  <div class="row">
+    <div class="wide"><span class="pic"><svg viewBox="0 0 140 150" style="color:#55585f"><use href="#jacket"/></svg></span><span class="txt"><span class="state bought"><svg width="11" height="11"><use href="#i-check"/></svg>Bought</span><span class="name">Felted Funnel-collar Jacket</span><span class="store">H&amp;M · Rs. 2,799</span></span></div>
+    <div class="wide removed"><span class="pic"><svg viewBox="0 0 140 150" style="color:#c9b79a"><use href="#jacket"/></svg></span><span class="txt"><span class="state removed">Removed</span><span class="name">Teddy Jacket</span><span class="store">H&amp;M · Rs. 1,499</span></span><span class="undo">Put back</span></div>
+  </div>
+</div>
+<div class="tabbar">
+  <svg class="bg" viewBox="0 0 390 124" preserveAspectRatio="none" aria-hidden="true"><path d="M0 4C70 4 120 50 195 50S320 4 390 4V124H0Z" fill="#fff"/></svg>
+  <span class="fab" aria-label="Save a screenshot"><span><svg width="24" height="24"><use href="#i-scan"/></svg></span></span>
+  <nav class="tabs">
+    <span class="tab on"><svg width="22" height="22"><use href="#i-home"/></svg></span>
+    <span class="tab"><svg width="22" height="22"><use href="#i-drop"/></svg></span>
+    <span></span>
+    <span class="tab"><svg width="22" height="22"><use href="#i-check"/></svg></span>
+    <span class="tab"><svg width="22" height="22"><use href="#i-gear"/></svg></span>
+  </nav>
+</div>
+</div>
+<figcaption>Home: price-drop banner, store chips, rack grid</figcaption>
+</figure>
+
+<!-- 2. ITEM -->
+<figure>
+<div class="phone"><div class="screen" style="padding-bottom:110px">
+  <div class="status"><span>9:41</span><i></i></div>
+  <div class="top">
+    <span class="circle"><svg width="20" height="20"><use href="#i-left"/></svg></span>
+    <span class="circle"><svg width="20" height="20"><use href="#i-heart"/></svg></span>
+  </div>
+  <div class="hero"><svg class="g" viewBox="0 0 100 150" style="color:#7d8458"><use href="#pants"/></svg><span class="sample">Your photo goes here</span></div>
+  <div class="detail">
+    <div class="store">Bonkers Corner · Olive</div>
+    <h2>Olive Faded Loose Fit Pants</h2>
+    <div class="pricebox"><b>Rs. 1,499</b><s>Rs. 1,799</s><span>17% off</span></div>
+    <div class="was">↓ Was Rs. 1,599 until 19 Nov</div>
+    <div class="pills"><span class="pill"><small>My size</small>32</span><span class="pill"><small>Saved</small>12 Nov</span><span class="pill"><small>Checked</small>Yesterday</span></div>
+  </div>
+  <div class="history">
+    <h4>Price over time</h4>
+    <div class="bars"><i style="height:100%"></i><i style="height:100%"></i><i class="down" style="height:80%"></i><i style="height:80%"></i><i class="up" style="height:90%"></i><i class="down" style="height:60%"></i><i class="down" style="height:40%"></i></div>
+    <div class="axis"><span>9 Nov</span><span>Lowest Rs. 1,499</span><span>19 Nov</span></div>
+  </div>
+  <div class="section-title"><h3>Look elsewhere</h3></div>
+  <div class="chips"><span class="chip">Myntra</span><span class="chip">Amazon</span><span class="chip">Flipkart</span><span class="chip">Ajio</span></div>
+</div>
+<div class="cta"><span class="btn square"><svg width="22" height="22"><use href="#i-check"/></svg></span><span class="btn primary">Go to Bonkers Corner <svg width="18" height="18"><use href="#i-out"/></svg></span></div>
+</div>
+<figcaption>Item: photo, price history, go to store</figcaption>
+</figure>
+
+<!-- 3. SAVE + REVIEW -->
+<figure>
+<div class="phone"><div class="screen">
+  <div class="status"><span>9:41</span><i></i></div>
+  <div class="title-row"><span class="circle"><svg width="20" height="20"><use href="#i-left"/></svg></span><h2>Save something</h2></div>
+  <section class="drop">
+    <p>Share a screenshot or link to Wishrack, or paste one here.</p>
+    <div class="input"><span>Paste a product link</span><span class="btn">Save</span></div>
+    <div class="two"><span class="btn"><svg width="18" height="18"><use href="#i-image"/></svg>Screenshots</span><span class="btn"><svg width="18" height="18"><use href="#i-pen"/></svg>Add by hand</span></div>
+  </section>
+  <div class="section-title"><h3>Check it, then save</h3></div>
+  <div class="review">
+    <div class="crop"><div class="shot">Sponsored · Bonkers Corner<div></div>Olive Faded Loose Fit Pants<br>Rs. 1,499 Rs. 1,799</div><div class="box"><i></i><i></i><i></i><i></i></div></div>
+    <div class="fields">
+      <div class="field"><label>Name</label><div>Olive Faded Loose Fit…</div></div>
+      <div class="field-pair"><div class="field"><label>Price</label><div>1,499</div></div><div class="field"><label>MRP</label><div>1,799</div></div></div>
+      <div class="field miss"><label>Size</label><div>Add if you know</div></div>
+      <span class="read-by">Read by Gemini</span>
+    </div>
+  </div>
+  <div style="padding:16px 20px 0;display:flex;gap:10px"><span class="btn primary" style="flex:1">Save to rack</span><span class="btn square" style="width:auto;padding:0 18px;font-size:14px">Discard</span></div>
+</div>
+<div class="tabbar">
+  <svg class="bg" viewBox="0 0 390 124" preserveAspectRatio="none" aria-hidden="true"><path d="M0 4C70 4 120 50 195 50S320 4 390 4V124H0Z" fill="#fff"/></svg>
+  <span class="fab"><span><svg width="24" height="24"><use href="#i-scan"/></svg></span></span>
+  <nav class="tabs"><span class="tab"><svg width="22" height="22"><use href="#i-home"/></svg></span><span class="tab"><svg width="22" height="22"><use href="#i-drop"/></svg></span><span></span><span class="tab"><svg width="22" height="22"><use href="#i-check"/></svg></span><span class="tab"><svg width="22" height="22"><use href="#i-gear"/></svg></span></nav>
+</div>
+</div>
+<figcaption>Save: paste or share, then check and crop</figcaption>
+</figure>
+
+<!-- 4. GATE -->
+<figure>
+<div class="phone"><div class="gate">
+  <div class="glow"></div>
+  <div class="art" aria-hidden="true"><svg viewBox="0 0 140 150" style="color:#d9cbb2"><use href="#cardigan"/></svg><svg viewBox="0 0 100 150" style="color:#a9c9ad"><use href="#joggers"/></svg></div>
+  <h2>Your rack is<br>waiting for you</h2>
+  <p>Type your passcode. This phone will remember it.</p>
+  <div class="input"><span>••••••</span><span class="btn">Open</span></div>
+</div></div>
+<figcaption>Passcode screen</figcaption>
+</figure>
+
+</div>
+
+<section class="notes">
+  <h2>How your screenshot maps onto Wishrack</h2>
+  <ul>
+    <li><b>"Most Popular Plant" banner</b> becomes the price-drop banner: it slides through items whose price fell.</li>
+    <li><b>Indoor / Outdoor chips</b> become your stores (All, H&amp;M, Bonkers Corner, Uniqlo).</li>
+    <li><b>Plant cards with the + button</b> become your saved items. The round button opens the store, and the dark footer shows the price and MRP.</li>
+    <li><b>"Suitable For You"</b> becomes <b>Bought &amp; removed</b>. When you mark an item bought, or remove it, it moves out of the grid into this row instead of disappearing. Removed items have a "Put back" button, and you can delete them for good from "See all". (The Teddy Jacket here is only an example of a removed item; your felted jacket is your real bought item.)</li>
+    <li><b>The bag</b> opens what you've bought, and <b>the avatar</b> opens settings.</li>
+    <li><b>The raised centre button</b> saves a screenshot. The tabs are Home, Price drops, Bought and Settings.</li>
+    <li>This is a light look. You told me earlier you scroll late at night, so after you approve I can add a matching dark-green night version.</li>
+  </ul>
+</section>
+</div>
+</body>
+</html>

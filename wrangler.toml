@@ -22,8 +22,9 @@ database_id = "56d61206-203f-4608-aaa2-1117b467094d"
 crons = ["30 2 * * *"]
 
 [vars]
-# Gemini model used to read screenshots and pages. Change it here if Google renames or retires it.
-GEMINI_MODEL = "gemini-2.5-flash"
+# Gemini model for reading screenshots. Leave empty to use the newest stable Flash model Google offers (picked automatically);
+# set a name like "gemini-3.5-flash" to pin one.
+GEMINI_MODEL = ""
 
 # Secrets (never put these in this file):
 #   APP_PASSCODE    the passcode you type into the app      ->  npx wrangler secret put APP_PASSCODE

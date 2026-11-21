@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Wishrack splash options</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --page: #eaf4ef; --panel: #dcebe3; --panel-hi: #f4faf7; --forest: #12493b; --forest-2: #1d5c4b;
+  --on-forest-2: #cfe3d9; --on-forest-3: #a9cbbd; --sage: #a9c9ad; --ink: #13241e; --ink-2: #56685f;
+  --font: Poppins, system-ui, sans-serif;
+}
+* { box-sizing: border-box; margin: 0; }
+body { background: #c9ddd3; font-family: var(--font); color: var(--ink); padding: 32px 16px 48px; }
+h1 { font-size: 22px; font-weight: 700; color: var(--forest); text-align: center; }
+.lead { text-align: center; color: var(--ink-2); font-size: 14px; margin: 6px auto 28px; max-width: 56ch; }
+.row { display: flex; flex-wrap: wrap; gap: 32px; justify-content: center; }
+figure { display: grid; gap: 12px; justify-items: center; }
+figcaption { text-align: center; max-width: 300px; }
+figcaption b { display: block; font-size: 16px; color: var(--forest); }
+figcaption span { font-size: 13px; color: var(--ink-2); }
+.phone { width: 300px; height: 620px; border-radius: 40px; overflow: hidden; position: relative;
+  box-shadow: 0 30px 60px -30px rgba(18,73,59,.55), 0 0 0 8px #0f2a22; }
+.girl { width: 118px; height: 198px; image-rendering: auto; display: block; }
+.word { font-weight: 700; font-size: 30px; letter-spacing: -.01em; }
+.sub { font-size: 13px; margin-top: 2px; }
+
+/* A: the girl is the item on the rack — mint panel curving into a forest footer */
+.a { background: var(--page); display: grid; place-items: center; }
+.a .card { width: 220px; border-radius: 26px; background: var(--forest); overflow: hidden;
+  box-shadow: 0 24px 40px -24px rgba(18,73,59,.6); }
+.a .panel { background: linear-gradient(var(--panel-hi), var(--panel)); border-radius: 26px 26px 30px 30px;
+  height: 260px; display: grid; place-items: end center; padding-bottom: 18px; position: relative; }
+.a .panel::after { content: ""; position: absolute; bottom: 16px; width: 96px; height: 12px; border-radius: 50%;
+  background: rgba(18,73,59,.14); }
+.a .girl { position: relative; z-index: 1; }
+.a .foot { color: #fff; padding: 14px 18px 18px; }
+.a .foot .word { font-size: 24px; }
+.a .foot .sub { color: var(--on-forest-2); }
+
+/* B: full forest night, mint spotlight floor */
+.b { background: var(--forest); color: #fff; display: grid; place-items: center; }
+.b .stage { display: grid; justify-items: center; position: relative; }
+.b .glow { position: absolute; top: 40px; width: 230px; height: 230px; border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(169,201,173,.32), rgba(169,201,173,0)); }
+.b .floor { width: 150px; height: 26px; border-radius: 50%; margin-top: -14px;
+  background: radial-gradient(closest-side, rgba(220,235,227,.45), rgba(220,235,227,0)); }
+.b .girl { position: relative; }
+.b .word { margin-top: 26px; }
+.b .sub { color: var(--on-forest-3); }
+
+/* C: bright day, sage circle, forest wordmark, curved forest base */
+.c { background: var(--page); display: grid; grid-template-rows: 1fr auto; }
+.c .top { display: grid; place-items: center; align-content: center; }
+.c .disc { width: 210px; height: 210px; border-radius: 50%; background: var(--sage);
+  display: grid; place-items: end center; overflow: hidden; }
+.c .girl { margin-bottom: -6px; }
+.c .word { color: var(--forest); margin-top: 22px; }
+.c .sub { color: var(--ink-2); }
+.c .base { height: 120px; background: var(--forest); border-radius: 48px 48px 0 0;
+  display: grid; place-items: center; color: var(--on-forest-2); font-size: 12px; }
+.c .dots { display: flex; gap: 6px; }
+.c .dots i { width: 7px; height: 7px; border-radius: 50%; background: var(--on-forest-3); animation: blink 1.2s infinite; }
+.c .dots i:nth-child(2) { animation-delay: .2s; } .c .dots i:nth-child(3) { animation-delay: .4s; }
+@keyframes blink { 50% { opacity: .25; } }
+.center { text-align: center; }
+</style>
+</head>
+<body>
+<h1>Launch screen, in the green theme</h1>
+<p class="lead">She skips for 2 seconds, then the rack fades in. Pick one.</p>
+<div class="row">
+  <figure>
+    <div class="phone a">
+      <div>
+        <div class="card">
+          <div class="panel"><img class="girl" alt=""></div>
+          <div class="foot"><div class="word">Wishrack</div><div class="sub">Loading your rack</div></div>
+        </div>
+      </div>
+    </div>
+    <figcaption><b>A. She's on the rack</b><span>Mint page; she stands in a product card that curves into the forest price footer, like every item in the app.</span></figcaption>
+  </figure>
+  <figure>
+    <div class="phone b">
+      <div class="stage center">
+        <div class="glow"></div>
+        <img class="girl" alt="">
+        <div class="floor"></div>
+        <div class="word">Wishrack</div>
+        <div class="sub">Loading your rack</div>
+      </div>
+    </div>
+    <figcaption><b>B. Forest spotlight</b><span>Deep forest, a soft mint glow and floor under her. Matches the app's start colour, so no flash.</span></figcaption>
+  </figure>
+  <figure>
+    <div class="phone c">
+      <div class="top center">
+        <div class="disc"><img class="girl" alt=""></div>
+        <div class="word">Wishrack</div>
+        <div class="sub">Loading your rack</div>
+      </div>
+      <div class="base"><div class="dots"><i></i><i></i><i></i></div></div>
+    </div>
+    <figcaption><b>C. Sage day</b><span>Bright mint, she skips inside a sage circle, with the app's curved forest bar at the bottom.</span></figcaption>
+  </figure>
+</div>
+<script>
+const frames = Array.from({ length: 30 }, (_, i) => `splash/girl_skip_${String(i).padStart(2, "0")}.png`);
+frames.forEach(src => { new Image().src = src; });
+const imgs = document.querySelectorAll(".girl");
+let f = 0;
+const tick = () => { imgs.forEach(img => img.src = frames[f]); f = (f + 1) % frames.length; };
+tick();
+if (!matchMedia("(prefers-reduced-motion: reduce)").matches) setInterval(tick, 33);
+</script>
+</body>
+</html>

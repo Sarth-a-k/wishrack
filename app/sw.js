@@ -1,6 +1,6 @@
 // Wishrack service worker: keeps the app shell for offline opening, and receives the Android share sheet.
-const SHELL = "wr-shell-v9";
-const FILES = ["/", "/styles.css", "/app.js", "/manifest.webmanifest", "/icons/icon.svg", "/icons/icon-192.png", "/fonts/bricolage-grotesque-latin.woff2", "/fonts/figtree-latin.woff2"];
+const SHELL = "wr-shell-v13";
+const FILES = ["/", "/styles.css", "/app.js", "/zoom.js", "/manifest.webmanifest", "/icons/icon.svg", "/icons/icon-192.png", "/fonts/poppins-400-latin.woff2", "/fonts/poppins-500-latin.woff2", "/fonts/poppins-600-latin.woff2", "/fonts/poppins-700-latin.woff2"];
 
 self.addEventListener("install", (e) => {
   e.waitUntil(caches.open(SHELL).then((c) => c.addAll(FILES)).then(() => self.skipWaiting()));

@@ -40,7 +40,7 @@ async function api(req, env, url, ctx) {
   const method = req.method;
 
   if (path === "/api/health" && method === "GET") {
-    return json({ ok: true, ai: !!env.GEMINI_API_KEY, passcodeSet: !!env.APP_PASSCODE, model: env.GEMINI_MODEL || "gemini-2.5-flash" });
+    return json({ ok: true, ai: !!env.GEMINI_API_KEY, passcodeSet: !!env.APP_PASSCODE, model: liveModel || env.GEMINI_MODEL || "gemini-flash-latest" });
   }
 
   // Photos are public by unguessable id so <img> tags can load them.
@@ -54,7 +54,12 @@ async function api(req, env, url, ctx) {
 
   if (path === "/api/items" && method === "GET") {
     const { results } = await env.DB.prepare("SELECT id, data FROM items ORDER BY updated_at DESC").all();
-    return json({ items: results.map((r) => ({ ...safeParse(r.data), id: r.id })) });
+    const items = results.map((r) => ({ ...safeParse(r.data), id: r.id }));
+    // After answering, quietly fetch store photos for a few items that have none (at most once every 6 hours each).
+    const now = Date.now();
+    const photoless = items.filter((x) => x.url && !x.imageId && !x.bought && !x.removed && now - (x.lastChecked || 0) > 6 * 3600e3).slice(0, 3);
+    if (photoless.length && ctx) ctx.waitUntil(Promise.all(photoless.map((x) => checkOne(env, x).catch(() => {}))));
+    return json({ items });
   }
 
   m = path.match(/^\/api\/items\/([A-Za-z0-9_-]{1,64})$/);
@@ -157,27 +162,98 @@ const FIELDS = `For each product give:
 - "currency": ISO code; "INR" when prices show Rs. or ₹
 - "colour": the colour if shown, else null`;
 
+const GEMINI = "https://generativelanguage.googleapis.com/v1beta/models";
+let liveModel = ""; // a working model found at run time, kept while this Worker instance lives
+
 async function gemini(env, parts) {
   if (!env.GEMINI_API_KEY) throw new HttpError(503, "no_ai", "Screenshot reading isn't set up. Add a Gemini key (see SETUP.md).");
-  const model = env.GEMINI_MODEL || "gemini-2.5-flash";
-  const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`, {
-    method: "POST",
-    headers: { "content-type": "application/json", "x-goog-api-key": env.GEMINI_API_KEY },
-    body: JSON.stringify({ contents: [{ role: "user", parts }], generationConfig: { responseMimeType: "application/json", temperature: 0.1 } }),
-    signal: AbortSignal.timeout(60000),
-  });
+  // GEMINI_MODEL pins a model; empty means use the newest stable Flash model Google lists (looked up once per Worker instance).
+  if (!env.GEMINI_MODEL && !liveModel) liveModel = await pickFlashModel(env);
+  let model = env.GEMINI_MODEL || liveModel || "gemini-flash-latest";
+  // Time limits keep the whole attempt, fallbacks included, under the phone app's 90-second wait.
+  let r = await callGemini(env, model, parts, 35000);
+  let errText = r.ok ? "" : await r.text();
+  // Google retires model names over time. When ours is gone, ask Google which Flash models exist now and use the newest.
+  if (r.status === 404 || (r.status === 400 && /not found|not supported|no longer|deprecated|retired/i.test(errText))) {
+    const found = await pickFlashModel(env);
+    if (found && found !== model) {
+      model = liveModel = found;
+      r = await callGemini(env, model, parts, 25000);
+      errText = r.ok ? "" : await r.text();
+    }
+  }
+  // 500/503: overloaded on Google's side, so retry once after a pause. 504 (too slow) goes straight to other models.
+  if (r.status >= 500 && r.status !== 504) {
+    await new Promise((res) => setTimeout(res, 1500));
+    r = await callGemini(env, model, parts, 20000);
+    errText = r.ok ? "" : await r.text();
+  }
+  if (r.status >= 500) {
+    for (const alt of await fallbackModels(env, model)) {
+      r = await callGemini(env, alt, parts, 20000); // not remembered: being busy is temporary
+      errText = r.ok ? "" : await r.text();
+      if (r.ok || (r.status < 500 && r.status !== 404)) break;
+    }
+  }
   if (r.status === 429) throw new HttpError(429, "ai_limit", "Gemini's free daily limit is used up. It resets tomorrow; the app reads screenshots on your device meanwhile.");
   if (r.status === 400 || r.status === 403) {
-    const t = await r.text();
-    throw new HttpError(502, "ai_key", /API key|PERMISSION|api_key/i.test(t) ? "Gemini rejected the key. Check GEMINI_API_KEY (see SETUP.md)." : "Gemini refused the request: " + t.slice(0, 200));
+    throw new HttpError(502, "ai_key", /API key|PERMISSION|api_key/i.test(errText) ? "Gemini rejected the key. Check GEMINI_API_KEY (see SETUP.md)." : "Gemini refused the request: " + errText.slice(0, 200));
   }
-  if (r.status === 404) throw new HttpError(502, "ai_model", `Gemini has no model called "${model}". Change GEMINI_MODEL in wrangler.toml.`);
+  if (r.status === 404) throw new HttpError(502, "ai_model", `Gemini has no model called "${model}" and no other Flash model was found. Set GEMINI_MODEL in wrangler.toml to a model from ai.google.dev/gemini-api/docs/models.`);
+  if (r.status >= 500) throw new HttpError(503, "ai_busy", (r.status === 504 ? "Gemini is too slow right now" : "Gemini is overloaded right now (" + r.status + ")") + ". Screenshots wait and are read again in a few minutes.");
   if (!r.ok) throw new HttpError(502, "ai_error", "Gemini didn't answer (" + r.status + "). Try again.");
   const j = await r.json();
   const text = (j.candidates?.[0]?.content?.parts || []).map((p) => p.text || "").join("");
   const parsed = looseJson(text);
   if (parsed == null) throw new HttpError(502, "ai_unreadable", "Gemini's answer couldn't be read. Try again.");
   return parsed;
+}
+async function callGemini(env, model, parts, ms) {
+  try {
+    return await fetch(`${GEMINI}/${encodeURIComponent(model)}:generateContent`, {
+      method: "POST",
+      headers: { "content-type": "application/json", "x-goog-api-key": env.GEMINI_API_KEY },
+      body: JSON.stringify({ contents: [{ role: "user", parts }], generationConfig: { responseMimeType: "application/json", temperature: 0.1 } }),
+      signal: AbortSignal.timeout(ms),
+    });
+  } catch {
+    return new Response("Gemini took too long or couldn't be reached", { status: 504 }); // handled like a busy model
+  }
+}
+// From Google's live model list: the "latest" Flash alias if offered, else the newest stable Flash model that reads images.
+async function pickFlashModel(env) {
+  try {
+    const r = await fetch(`${GEMINI}?pageSize=200`, { headers: { "x-goog-api-key": env.GEMINI_API_KEY }, signal: AbortSignal.timeout(15000) });
+    if (!r.ok) return "";
+    const names = ((await r.json()).models || [])
+      .filter((m) => (m.supportedGenerationMethods || []).includes("generateContent"))
+      .map((m) => String(m.name || "").replace(/^models\//, ""));
+    return chooseFlash(names);
+  } catch { return ""; }
+}
+// Up to two other models to try while ours is overloaded: other stable Flash models, newest first, then Flash-Lite.
+async function fallbackModels(env, current) {
+  try {
+    const r = await fetch(`${GEMINI}?pageSize=200`, { headers: { "x-goog-api-key": env.GEMINI_API_KEY }, signal: AbortSignal.timeout(10000) });
+    if (!r.ok) return [];
+    const names = ((await r.json()).models || [])
+      .filter((m) => (m.supportedGenerationMethods || []).includes("generateContent"))
+      .map((m) => String(m.name || "").replace(/^models\//, ""));
+    return orderFallbacks(names, current);
+  } catch { return []; }
+}
+function orderFallbacks(names, current) {
+  const version = (n) => Number((n.match(/gemini-(\d+(?:\.\d+)?)/) || [])[1] || 0);
+  const stable = (n) => /^gemini-\d/.test(n) && /flash/.test(n) && !/image|tts|audio|live|embed|exp|preview|8b/.test(n);
+  const full = names.filter((n) => stable(n) && !/lite/.test(n)).sort((a, b) => version(b) - version(a));
+  const lite = names.filter((n) => stable(n) && /lite/.test(n)).sort((a, b) => version(b) - version(a));
+  return [...full, ...lite].filter((n) => n !== current).slice(0, 2);
+}
+// The newest stable numbered Flash model (faster than the "latest" alias, which can point at a slower new release).
+function chooseFlash(names) {
+  const version = (n) => Number((n.match(/gemini-(\d+(?:\.\d+)?)/) || [])[1] || 0);
+  const flash = names.filter((n) => /^gemini-\d/.test(n) && /flash/.test(n) && !/lite|image|tts|audio|live|embed|exp|preview|8b|\d{3,}$/.test(n)).sort((a, b) => version(b) - version(a));
+  return flash[0] || (names.includes("gemini-flash-latest") ? "gemini-flash-latest" : names.find((n) => /flash/.test(n)) || "");
 }
 function looseJson(t) {
   t = String(t || "").trim();
@@ -405,7 +481,7 @@ async function checkPrices(env, limit) {
   const { results } = await env.DB.prepare("SELECT id, data FROM items").all();
   const due = results
     .map((r) => ({ ...safeParse(r.data), id: r.id }))
-    .filter((x) => x.url && !x.bought)
+    .filter((x) => x.url && !x.bought && !x.removed)
     .sort((a, b) => (a.lastChecked || 0) - (b.lastChecked || 0))
     .slice(0, limit);
   for (const item of due) {

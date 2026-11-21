@@ -35,6 +35,13 @@ public class ShotJob extends JobService {
     public boolean onStopJob(JobParameters params) { return true; }
 
     static void schedule(Context c) {
+        // Scheduling must never take the app down with it; a failure here only costs automatic saving.
+        try { scheduleJobs(c); } catch (RuntimeException e) {
+            Processor.prefs(c).edit().putString("status", "Automatic saving couldn't start: " + e.getMessage()).apply();
+        }
+    }
+
+    private static void scheduleJobs(Context c) {
         JobScheduler js = c.getSystemService(JobScheduler.class);
         ComponentName cn = new ComponentName(c, ShotJob.class);
         if (!Processor.prefs(c).getBoolean("auto", true)) {
@@ -60,9 +67,9 @@ public class ShotJob extends JobService {
     static void processShared(Context c, String[] files) {
         PersistableBundle extras = new PersistableBundle();
         extras.putStringArray("files", files);
-        c.getSystemService(JobScheduler.class).schedule(new JobInfo.Builder(SHARE, new ComponentName(c, ShotJob.class))
+        try { c.getSystemService(JobScheduler.class).schedule(new JobInfo.Builder(SHARE, new ComponentName(c, ShotJob.class))
                 .setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY)
                 .setExtras(extras)
-                .build());
+                .build()); } catch (RuntimeException e) { new Thread(() -> Processor.runFiles(c, files)).start(); }
     }
 }

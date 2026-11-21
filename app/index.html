@@ -5,29 +5,43 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Wishrack</title>
 <meta name="description" content="Save clothes you see, check their prices, go buy them.">
-<meta name="theme-color" content="#141a30">
+<meta name="theme-color" content="#eaf4ef">
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="icon" href="/icons/icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
-<link rel="preload" href="/fonts/bricolage-grotesque-latin.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="/fonts/figtree-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/poppins-400-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/poppins-600-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/styles.css">
 <script>try{var t=localStorage.getItem("wr.theme");if(t&&t!=="system")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
 </head>
 <body>
 
+<!-- Shared drawings -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <!-- Decorative garments for the passcode screen only (never stand in for a saved product's photo). -->
+    <symbol id="g-cardigan" viewBox="0 0 140 150"><path d="M46 8 58 4h24l12 4 26 12 14 76-16 4-10-50v96H36V50L26 100l-16-4 14-76Z" fill="currentColor"/><path d="M58 4l12 30 12-30" fill="none" stroke="#000" stroke-opacity=".25" stroke-width="2"/><path d="M70 34v112" stroke="#000" stroke-opacity=".3" stroke-width="2"/><path d="M36 136h68" stroke="#000" stroke-opacity=".18" stroke-width="8"/></symbol>
+    <symbol id="g-joggers" viewBox="0 0 100 150"><path d="M22 8h56l4 120-2 12H60l-1-10L50 54l-9 76-1 10H20l-2-12Z" fill="currentColor"/><path d="M22 8h56v12H22z" fill="#000" opacity=".16"/><path d="M20 130h20M60 130h20" stroke="#000" stroke-opacity=".22" stroke-width="5"/></symbol>
+    <symbol id="i-hanger" viewBox="0 0 24 24"><path d="M12 7.5a2 2 0 1 1 2-2c0 1.2-2 1.6-2 3.2v.6m0 0-8.6 6.1A1.4 1.4 0 0 0 4.2 18h15.6a1.4 1.4 0 0 0 .8-2.6Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  </defs>
+</svg>
+
 <!-- Passcode screen -->
 <section class="gate" id="gate" hidden aria-labelledby="gateTitle">
+  <div class="gate-glow" aria-hidden="true"></div>
+  <div class="gate-art" aria-hidden="true">
+    <svg viewBox="0 0 140 150" class="g1"><use href="#g-cardigan"/></svg>
+    <svg viewBox="0 0 100 150" class="g2"><use href="#g-joggers"/></svg>
+  </div>
   <div class="gate-inner">
-    <p class="logo"><span class="button-mark" aria-hidden="true"></span>Wishrack</p>
-    <div class="swatch" aria-hidden="true"></div>
-    <h1 id="gateTitle">Your rack is tucked away</h1>
-    <p class="gate-sub">Type the passcode you set when you put Wishrack online. This device will remember it.</p>
+    <p class="gate-brand">Wishrack</p>
+    <h1 id="gateTitle">Your rack is waiting for you</h1>
+    <p class="gate-sub">Type your passcode. This device will remember it.</p>
     <form id="gateForm" class="gate-form" autocomplete="on">
-      <label for="gateIn">Passcode</label>
-      <div class="gate-row">
-        <input id="gateIn" type="password" autocomplete="current-password" required>
-        <button class="btn primary" type="submit" id="gateBtn">Open my rack</button>
+      <label for="gateIn" class="sr">Passcode</label>
+      <div class="pill-input">
+        <input id="gateIn" type="password" autocomplete="current-password" placeholder="Passcode" required>
+        <button class="btn primary" type="submit" id="gateBtn">Open</button>
       </div>
     </form>
     <p class="status err" id="gateMsg" role="alert"></p>
@@ -35,67 +49,108 @@
 </section>
 
 <div id="appView" hidden>
-  <header class="bar">
-    <div class="wrap bar-row">
-      <p class="logo"><span class="button-mark" aria-hidden="true"></span>Wishrack</p>
-      <div class="bar-right">
-        <p class="tally" id="tally" aria-live="polite"></p>
-        <button class="icon-btn" id="settingsBtn" type="button" aria-label="Settings">
-          <svg class="ic" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 13.5a7.6 7.6 0 0 0 0-3l2-1.5-2-3.4-2.3 1a7.4 7.4 0 0 0-2.6-1.5L14 2.6h-4l-.5 2.5A7.4 7.4 0 0 0 6.9 6.6l-2.3-1-2 3.4 2 1.5a7.6 7.6 0 0 0 0 3l-2 1.5 2 3.4 2.3-1a7.4 7.4 0 0 0 2.6 1.5l.5 2.5h4l.5-2.5a7.4 7.4 0 0 0 2.6-1.5l2.3 1 2-3.4-2-1.5Z"/></svg>
-        </button>
+
+  <!-- Home -->
+  <div class="view" id="view-home">
+    <header class="top">
+      <button class="circle" id="searchBtn" type="button" aria-label="Search your rack" aria-expanded="false" aria-controls="searchRow"><svg class="ic" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.4-4.4"/></svg></button>
+      <div class="top-right">
+        <button class="circle" id="boughtBtn" type="button" aria-label="Bought and removed"><svg class="ic" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M5.5 8h13l-1 12h-11Z"/><path d="M9 8V6.5a3 3 0 0 1 6 0V8"/></svg><span class="badge" id="boughtBadge" hidden></span></button>
+        <button class="avatar" id="settingsBtn" type="button" aria-label="Settings">W</button>
       </div>
+    </header>
+    <div class="search-row" id="searchRow" hidden>
+      <label for="searchIn" class="sr">Search your rack</label>
+      <input id="searchIn" type="search" placeholder="Search by name, store or colour" autocomplete="off">
     </div>
-  </header>
+    <h1 class="hello">Get your favourite fits for less</h1>
+    <p class="tally" id="tally" aria-live="polite"></p>
+    <section class="banner" id="banner" aria-roledescription="carousel" aria-label="Price drops"></section>
+    <p class="note" id="note" hidden></p>
 
-  <section class="wrap add" aria-labelledby="addTitle">
-    <div class="drop" id="drop">
-      <div class="peerie" aria-hidden="true"></div>
-      <h2 id="addTitle">Save something you saw</h2>
-      <p class="sub">Share a screenshot or link to Wishrack, paste one here, or pick screenshots from your gallery.</p>
-      <form class="link-row" id="linkForm">
-        <label for="linkIn" class="sr">Product link</label>
-        <input class="link-in" id="linkIn" type="url" inputmode="url" placeholder="Paste a product link" autocomplete="off">
-        <button class="btn primary" type="submit">Save</button>
-      </form>
-      <div class="row">
-        <label class="btn ghost" for="fileIn"><svg class="ic" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4.5" width="17" height="15" rx="3"/><circle cx="9" cy="10" r="1.8"/><path d="m4.5 17.5 5-5 4 4 2.5-2.5 3.5 3.5"/></svg>Choose screenshots</label>
-        <input id="fileIn" type="file" accept="image/*" multiple hidden>
-        <button class="btn ghost" id="manualBtn" type="button"><svg class="ic" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16v4Z"/><path d="m13.5 6.5 4 4"/></svg>Add by hand</button>
-      </div>
-      <div class="progress" id="progress" hidden><span id="progressBar"></span></div>
-      <p class="status" id="status" role="status" aria-live="polite"></p>
-    </div>
-    <div class="review" id="review" hidden></div>
-  </section>
+    <section class="inbox" id="inbox" hidden aria-labelledby="inboxTitle">
+      <div class="section-title"><h2 id="inboxTitle">Waiting for you</h2></div>
+      <p class="sub">Saved from your screenshots, but the price couldn't be read. Open one, add the price, then put it on your rack.</p>
+      <div class="grid" id="inboxGrid"></div>
+    </section>
 
-  <section class="wrap inbox" id="inbox" hidden aria-labelledby="inboxTitle">
-    <h2 id="inboxTitle">Waiting for you</h2>
-    <p class="sub">Saved from your screenshots, but the price couldn't be read. Open one, add the price, then put it on your rack.</p>
-    <div class="grid" id="inboxGrid"></div>
-  </section>
-
-  <div class="wrap">
-    <div class="toolbar">
-      <p class="count" id="count"></p>
-      <div class="tools">
-        <label class="sel"><span class="sr">Show store</span><select id="storeSel"></select></label>
-        <label class="sel"><span class="sr">Sort</span><select id="sortSel">
+    <div class="chips" id="chips" role="toolbar" aria-label="Sort and filter">
+      <label class="chip icon sort-chip" title="Sort">
+        <svg class="ic" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 8h10M18 8h2M4 16h2M10 16h10"/><circle cx="16" cy="8" r="2"/><circle cx="8" cy="16" r="2"/></svg>
+        <span class="sr">Sort</span>
+        <select id="sortSel">
           <option value="new">Newest first</option>
           <option value="low">Price, low to high</option>
           <option value="high">Price, high to low</option>
           <option value="off">Biggest discount</option>
           <option value="drop">Recent price drops</option>
-        </select></label>
-      </div>
+        </select>
+      </label>
+      <div class="chip-list" id="storeChips"></div>
     </div>
-    <p class="note" id="note" hidden></p>
+    <p class="count" id="count"></p>
     <main class="grid" id="grid" aria-live="polite"></main>
+
+    <section class="gone-strip" id="goneStrip" hidden aria-labelledby="goneTitle">
+      <div class="section-title"><h2 id="goneTitle">Bought &amp; removed</h2><button class="see-all" type="button" data-view="gone">See all</button></div>
+      <div class="row-scroll" id="goneRow"></div>
+    </section>
   </div>
+
+  <!-- Price drops -->
+  <div class="view" id="view-drops" hidden>
+    <header class="top titled"><button class="circle back" type="button" aria-label="Back"><svg class="ic" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m14 6-6 6 6 6"/></svg></button><h1>Price drops</h1></header>
+    <p class="sub pad">Items whose price fell since you saved them. Wishrack checks every morning.</p>
+    <main class="grid" id="dropsGrid"></main>
+  </div>
+
+  <!-- Save -->
+  <div class="view" id="view-save" hidden>
+    <header class="top titled"><button class="circle back" type="button" aria-label="Back"><svg class="ic" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m14 6-6 6 6 6"/></svg></button><h1>Save something</h1></header>
+    <section class="drop" id="drop" aria-label="Save a product">
+      <p>Share a screenshot or link to Wishrack, paste one here, or pick screenshots from your gallery.</p>
+      <form class="pill-input" id="linkForm">
+        <label for="linkIn" class="sr">Product link</label>
+        <input id="linkIn" type="url" inputmode="url" placeholder="Paste a product link" autocomplete="off">
+        <button class="btn sage" type="submit">Save</button>
+      </form>
+      <div class="two">
+        <label class="btn deep" for="fileIn"><svg class="ic" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4.5" width="17" height="15" rx="3"/><circle cx="9" cy="10" r="1.8"/><path d="m4.5 17.5 5-5 4 4 2.5-2.5 3.5 3.5"/></svg>Screenshots</label>
+        <input id="fileIn" type="file" accept="image/*" multiple hidden>
+        <button class="btn deep" id="manualBtn" type="button"><svg class="ic" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16v4Z"/><path d="m13.5 6.5 4 4"/></svg>Add by hand</button>
+      </div>
+      <div class="progress" id="progress" hidden><span id="progressBar"></span></div>
+      <p class="status" id="status" role="status" aria-live="polite"></p>
+    </section>
+    <div class="review" id="review" hidden></div>
+  </div>
+
+  <!-- Bought & removed -->
+  <div class="view" id="view-gone" hidden>
+    <header class="top titled"><button class="circle back" type="button" aria-label="Back"><svg class="ic" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m14 6-6 6 6 6"/></svg></button><h1>Bought &amp; removed</h1></header>
+    <p class="sub pad">Things you bought or took off your rack. Put one back to keep watching its price.</p>
+    <div class="gone-list" id="goneList"></div>
+  </div>
+
+  <!-- Bottom bar -->
+  <nav class="tabbar" aria-label="Main">
+    <svg class="tabbar-bg" viewBox="0 0 390 124" preserveAspectRatio="none" aria-hidden="true"><path d="M0 30Q0 4 26 4C84 4 126 50 195 50S306 4 364 4Q390 4 390 30V124H0Z"/></svg>
+    <button class="fab" id="fabSave" type="button" aria-label="Save a screenshot or link"><span><svg class="ic" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 9V6a2 2 0 0 1 2-2h3M15 4h3a2 2 0 0 1 2 2v3M20 15v3a2 2 0 0 1-2 2h-3M9 20H6a2 2 0 0 1-2-2v-3"/><path d="M8 12h8"/></svg></span></button>
+    <div class="tabs">
+      <button class="tab" type="button" data-view="home" aria-label="Home"><svg class="ic" viewBox="0 0 24 24" width="23" height="23" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M4 11 12 4l8 7v8.5a1 1 0 0 1-1 1h-4.5v-6h-5v6H5a1 1 0 0 1-1-1Z"/></svg></button>
+      <button class="tab" type="button" data-view="drops" aria-label="Price drops"><svg class="ic" viewBox="0 0 24 24" width="23" height="23" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6l6 6 4-4 6 6"/><path d="M15 14h5v-5"/></svg></button>
+      <span aria-hidden="true"></span>
+      <button class="tab" type="button" data-view="gone" aria-label="Bought and removed"><svg class="ic" viewBox="0 0 24 24" width="23" height="23" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 9.5 17 19 7.5"/></svg></button>
+      <button class="tab" type="button" id="settingsTab" aria-label="Settings"><svg class="ic" viewBox="0 0 24 24" width="23" height="23" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 13.5a7.6 7.6 0 0 0 0-3l2-1.5-2-3.4-2.3 1a7.4 7.4 0 0 0-2.6-1.5L14 2.6h-4l-.5 2.5A7.4 7.4 0 0 0 6.9 6.6l-2.3-1-2 3.4 2 1.5a7.6 7.6 0 0 0 0 3l-2 1.5 2 3.4 2.3-1a7.4 7.4 0 0 0 2.6 1.5l.5 2.5h4l.5-2.5a7.4 7.4 0 0 0 2.6-1.5l2.3 1 2-3.4Z"/></svg></button>
+    </div>
+  </nav>
 </div>
 
 <div class="shade" id="shade" hidden></div>
 <aside class="sheet" id="sheet" hidden role="dialog" aria-modal="true" aria-labelledby="sheetTitle"></aside>
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 
 <script src="/app.js" defer></script>
+<script src="/zoom.js" defer></script>
 </body>
 </html>

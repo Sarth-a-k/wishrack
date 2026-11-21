@@ -51,13 +51,14 @@ Every store has its own wishlist, but each one only holds that store's items and
 - Cross-store comparison is search links to Myntra, Amazon, Flipkart, Ajio and Google Shopping, not automatic, because those stores block automated server requests. Price-drop tracking works on the saved store's page.
 - Instagram links need a login, so a link alone from Instagram gives little; a screenshot is the reliable input there.
 - Screenshot reading can be wrong; every extraction goes through a check-and-edit step (including adjusting the photo crop) before saving.
-- Terms used in the app: rack (the whole list), item, store, price, MRP (original price), price drop, bought.
-- Undecided: which visual design to use. Two mockups exist (`mockups/design-a.html`, `mockups/design-b.html`) and the owner has not picked one.
+- Terms used in the app: rack (the whole list), item, store, price, MRP (original price), price drop, bought, removed, "Bought & removed" (the list items move to when bought or removed).
+- Removing an item never deletes it: it moves to Bought & removed, where it can be put back. Only "Delete forever" in that list deletes.
+- Visual design: decided (November 2026). The owner chose "design C", forest green and mint, from a reference screenshot they supplied, and approved the preview (`mockups/design-c.html`). It is built into `app/` and recorded in DESIGN.md. The earlier mockups A and B and the navy "Nani's cardigan" look are retired.
 
 ## Brand Commitments
 
 - Name: Wishrack (current working name, in use across the app and mockups).
-- The owner has said they "naturally like blue and cozy colours". This is binding on the visual design.
+- Colours: the owner chose forest green and mint (design C) over the earlier blue-and-cozy direction. Their first brief was "blue and cozy colours"; the approved green design now replaces it. Keep the look cozy and not plain, with a dark-green Night version for late-night use.
 - The product grid should read like a store's product listing, modelled on the Uniqlo results grid the owner shared: product photo first, then name and price.
 - Tapping a product's photo opens the store that sells it.
 

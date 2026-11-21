@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Starts on the forest green so there's no white flash before the girl appears. -->
+    <style name="Wishrack" parent="@android:style/Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@color/icon_bg</item>
+        <item name="android:statusBarColor">@color/icon_bg</item>
+        <item name="android:navigationBarColor">@color/icon_bg</item>
+    </style>
+</resources>

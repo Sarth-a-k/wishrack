@@ -7,14 +7,14 @@ related_targets: ["app/styles.css","app/app.js"]
 
 # Wishrack app (app/index.html)
 
-Scope: the whole installable app: passcode gate, bar, save strip, review with crop editor, rack grid, item sheet, settings sheet. Mode: Operate.
-Audience and job: the owner, late at night in bed on an Android phone (also a Windows laptop). Save a product in one share or paste, check it, then browse and jump to the store.
-Constraints: dark-first (owner scrolls in bed), light "Day" theme too; cozy, blue-leaning, never plain. Prices in Rs., tabular. No fabricated product photos.
+Scope: the whole installable app: passcode gate, home (rack grid, price-drop banner, store chips, Bought & removed strip), Price drops, Save (link/screenshots, review with crop editor), Bought & removed, item sheet, settings. Mode: Operate.
+Audience and job: the owner, on an Android phone (often late at night) and a Windows laptop. Save a product in one share or paste, check it, then browse, watch prices and jump to the store.
+Constraints: Day (light mint) is the default look, Night is a dark-green version; prices in Rs., tabular. No fabricated product photos (placeholders show a hanger). Removing an item moves it to Bought & removed; only "Delete forever" there deletes. zoom.js must stay loaded.
 
 ## Direction contract
-THESIS: The rack is a hand-knit navy cardigan you pull on at night; it refuses the cold white store-app grid and the generic soft-card app.
-OWN-WORLD: navy wool ground (#141a30 / #1d2542 / #283258), oatmeal yarn text (#eadfc8), mustard button colour reserved only for pressable primary actions, berry for sale, moss for price drops. Bricolage Grotesque for wordmark, headings and prices; Figtree for UI. Large soft radii (14-18px), ribbed-cuff stripe edges on the bar and sheet top.
-STORY: The owner sees the rack total, saves by link or screenshot, fixes the read in the review (drag the crop), taps a photo to go to the store, opens an item to see its price history and search other stores.
-FIRST VIEWPORT: Navy bar with mustard-button logo, "N to buy" and total right; ribbed edge under it. Save strip card: heading, paste-link field + mustard Save, then Choose screenshots / Add by hand. Toolbar (count, store, sort) and a 2-column 3:4 photo-first grid below on phone, 4-6 columns on laptop.
-FORM: Signature move: price history knitted as a Fair Isle colourwork chart (stitch columns, moss for drops, berry for rises) in the item sheet. Raises: state by shape too (down chevron, struck MRP, check for bought); mustard only for actions; identical 3:4 frames; tabular prices, right-aligned in the price history and review lists. Adaptation: grid card prices stay left-aligned under the photo, per PRODUCT.md Brand Commitments (Uniqlo-style grid: photo, then name and price). Position 4 on my list. seed:e1e299b55e0d6ad4
+THESIS: Design C, pinned by the owner from a reference screenshot (a plant-shop app) and approved as a preview: forest green and mint, product cards whose light panel curves into a green price footer, one curved bottom bar with a raised save button. It replaces the earlier "Nani's cardigan" navy world.
+OWN-WORLD: forest #12493b for banner, card footers and primary actions; mint page wash #eaf4ef; panel #dcebe3; sage chips #a9c9ad; white circles and inputs; Poppins 400 to 700; large radii (16/22/28px); soft green-tinted shadows in Day, black in Night.
+STORY: The owner sees the rack total and the latest price drop, filters by store, taps a photo to go to the store, opens an item to see its price history, marks it bought or removes it, and can put it back from Bought & removed.
+FIRST VIEWPORT: Top row: search circle left; bag circle with count and green W avatar right. Two-line headline, rack total, forest price-drop banner with the item photo overflowing its top right, store chips, then the 2-column card grid; curved white bottom bar with Home, Price drops, raised scan button, Bought & removed, Settings.
+FORM: Pinned whole by the owner's screenshot and approved preview (mockups/design-c.html); the owner's words: "can we get the app front end to look exactly like the scrrenshot", then "Approve, build it". seed: none (pinned)
 FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance

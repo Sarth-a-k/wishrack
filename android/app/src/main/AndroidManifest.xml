@@ -2,6 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Android 14+ requires this for background jobs that wait for a network connection. -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <!-- Reading new screenshots: Android 13+ uses READ_MEDIA_IMAGES, older versions READ_EXTERNAL_STORAGE. -->
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
@@ -13,7 +15,7 @@
         android:label="Wishrack"
         android:icon="@mipmap/ic_launcher"
         android:allowBackup="false"
-        android:theme="@android:style/Theme.Material.NoActionBar">
+        android:theme="@style/Wishrack">
 
         <activity
             android:name=".MainActivity"

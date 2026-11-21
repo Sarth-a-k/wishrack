@@ -6,6 +6,9 @@ import android.content.ClipData;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.graphics.Typeface;
+import android.graphics.drawable.AnimationDrawable;
+import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -21,6 +24,8 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -32,16 +37,89 @@ import java.util.List;
 /** First run: connect to your Wishrack (address + passcode). After that: your Wishrack, full screen. */
 public class MainActivity extends Activity {
     private static final int PICK = 7, PERMS = 8;
-    private static final int BG = Color.parseColor("#141a30"), FG = Color.parseColor("#eef0f7"), DIM = Color.parseColor("#a6aec6");
+    // Where `npm run deploy` put Wishrack. Pre-filled on first run and still editable, in case it ever moves.
+    private static final String DEFAULT_BASE = "https://wishrack.chaudharisarth2006.workers.dev";
+    private static final int BG = Color.parseColor("#12493b"), FG = Color.WHITE, DIM = Color.parseColor("#cfe3d9");
+    private static final int SPLASH_MS = 2000, FRAME_MS = 33; // the 30-frame skip, twice
     private WebView web;
     private ValueCallback<Uri[]> fileCallback;
+    private FrameLayout content; // setup or the web app; the splash sits above it
 
     @Override
     protected void onCreate(Bundle b) {
         super.onCreate(b);
         getWindow().setStatusBarColor(BG);
         getWindow().setNavigationBarColor(BG);
+        FrameLayout root = new FrameLayout(this);
+        content = new FrameLayout(this);
+        root.addView(content);
+        setContentView(root);
         if (Processor.configured(this)) { showWeb(); ShotJob.schedule(this); } else showSetup(null);
+        if (b == null) showSplash(root); // cold start only, not after rotating the phone
+    }
+
+    private void setPage(View v) {
+        content.removeAllViews();
+        content.addView(v);
+    }
+
+    // ---------------------------------------------------------------- splash: the girl skips while the rack loads behind her
+    private void showSplash(FrameLayout root) {
+        AnimationDrawable skip = new AnimationDrawable();
+        for (int i = 0; i < 30; i++) {
+            int id = getResources().getIdentifier(String.format("girl_skip_%02d", i), "drawable", getPackageName());
+            if (id != 0) skip.addFrame(getDrawable(id), FRAME_MS);
+        }
+        skip.setOneShot(false);
+        ImageView girl = new ImageView(this);
+        girl.setImageDrawable(skip);
+        girl.setContentDescription("Wishrack");
+        // Forest spotlight: a soft mint glow behind her and a pale floor under her feet.
+        GradientDrawable glowBg = new GradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM, new int[]{0x52a9c9ad, 0x00a9c9ad});
+        glowBg.setShape(GradientDrawable.OVAL);
+        glowBg.setGradientType(GradientDrawable.RADIAL_GRADIENT);
+        glowBg.setGradientRadius(dp(115));
+        View glow = new View(this);
+        glow.setBackground(glowBg);
+        GradientDrawable floorBg = new GradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM, new int[]{0x73dcebe3, 0x00dcebe3});
+        floorBg.setShape(GradientDrawable.OVAL);
+        floorBg.setGradientType(GradientDrawable.RADIAL_GRADIENT);
+        floorBg.setGradientRadius(dp(75));
+        View floor = new View(this);
+        floor.setBackground(floorBg);
+        floor.setScaleY(26f / 150f); // squash a circle into a flat floor shadow
+        FrameLayout stage = new FrameLayout(this);
+        FrameLayout.LayoutParams gp = new FrameLayout.LayoutParams(dp(230), dp(230), Gravity.CENTER_HORIZONTAL);
+        gp.topMargin = dp(20);
+        stage.addView(glow, gp);
+        FrameLayout.LayoutParams fp = new FrameLayout.LayoutParams(dp(150), dp(150), Gravity.CENTER_HORIZONTAL);
+        fp.topMargin = dp(249) - dp(75);
+        stage.addView(floor, fp);
+        stage.addView(girl, new FrameLayout.LayoutParams(dp(150), dp(250), Gravity.CENTER_HORIZONTAL));
+
+        TextView name = text("Wishrack", 30, Color.WHITE);
+        name.setGravity(Gravity.CENTER);
+        name.setTypeface(Typeface.create("sans-serif-medium", Typeface.BOLD));
+        TextView sub = text("Loading your rack", 13, Color.parseColor("#a9cbbd"));
+        sub.setGravity(Gravity.CENTER);
+        LinearLayout col = new LinearLayout(this);
+        col.setOrientation(LinearLayout.VERTICAL);
+        col.setGravity(Gravity.CENTER);
+        col.addView(stage, new LinearLayout.LayoutParams(dp(240), dp(262)));
+        LinearLayout.LayoutParams np = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        np.topMargin = dp(26);
+        col.addView(name, np);
+        col.addView(sub, new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+        FrameLayout splash = new FrameLayout(this);
+        splash.setBackgroundColor(BG);
+        splash.setClickable(true); // swallow taps meant for the page underneath
+        splash.addView(col, new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
+        root.addView(splash, new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
+        skip.start();
+        splash.postDelayed(() -> splash.animate().alpha(0f).setDuration(280).withEndAction(() -> {
+            skip.stop();
+            root.removeView(splash);
+        }).start(), SPLASH_MS);
     }
 
     // ---------------------------------------------------------------- setup
@@ -55,9 +133,9 @@ public class MainActivity extends Activity {
         box.setPadding(pad, pad, pad, pad);
 
         TextView title = text("Connect Wishrack", 28, FG);
-        TextView sub = text("Use the address from npm run deploy and the passcode you set.", 15, DIM);
-        EditText url = field("https://wishrack.yourname.workers.dev", InputType.TYPE_TEXT_VARIATION_URI);
-        url.setText(p.getString("base", ""));
+        TextView sub = text("Type the passcode you set for Wishrack.", 15, DIM);
+        EditText url = field("Wishrack address", InputType.TYPE_TEXT_VARIATION_URI);
+        url.setText(p.getString("base", DEFAULT_BASE));
         EditText pass = field("Passcode", InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
         Button go = new Button(this);
         go.setText("Connect");
@@ -87,7 +165,7 @@ public class MainActivity extends Activity {
                 });
             }).start();
         });
-        setContentView(box);
+        setPage(box);
     }
 
     private void askPermissions() {
@@ -146,7 +224,7 @@ public class MainActivity extends Activity {
             }
         });
         web.loadUrl(base + "/");
-        setContentView(web);
+        setPage(web);
     }
 
     @Override

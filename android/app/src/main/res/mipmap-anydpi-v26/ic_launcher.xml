@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Android 8+ launchers shape this themselves (circle, squircle...); the girl stays inside the safe zone. -->
+<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+    <background android:drawable="@color/icon_bg" />
+    <foreground android:drawable="@drawable/ic_launcher_fg" />
+</adaptive-icon>
