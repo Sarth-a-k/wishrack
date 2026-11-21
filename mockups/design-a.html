@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Wishrack, design A</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@500;700&family=Instrument+Sans:wght@400;500;600&display=swap">
+<style>
+/* Design A, made with the frontend-design skill.
+   Brief additions: the client likes blue and cozy colours.
+   Concept: denim and its leather patch. Chambray-blue paper, indigo ink, and the price tag as a
+   leather patch with copper contrast stitching, the way the back of a pair of jeans is labelled.
+   The patch is the one loud thing; everything else is quiet.
+   Colour: chambray #eef2f8, indigo ink #1f2f4d, faded denim #5b7bb0, patch leather #c89a6a,
+           copper stitch #e3a458, sale red #c23a3a, drop green #2f7a52.
+   Type: Archivo Narrow (prices, headings, wordmark), Instrument Sans (everything else). Sentence case. */
+:root {
+  --paper: #f6f8fc; --chambray: #eaf0f8; --surface: #dfe7f2; --ink: #1f2f4d; --muted: #5d6b84; --line: #d3dcea;
+  --denim: #5b7bb0; --leather: #c89a6a; --leather-ink: #3d2714; --stitch: #f0c48a;
+  --sale: #c23a3a; --drop: #2f7a52; --btn: #1f2f4d; --btn-fg: #f6f8fc;
+  --display: "Archivo Narrow", "Arial Narrow", Arial, sans-serif; --body: "Instrument Sans", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root {
+  --paper: #121a2b; --chambray: #172236; --surface: #1d2a42; --ink: #e8eef8; --muted: #9eaccb; --line: #2a3a58;
+  --denim: #87a5d8; --sale: #ff7a7a; --drop: #6fd19b; --btn: #e8eef8; --btn-fg: #121a2b; color-scheme: dark; } }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--paper); color: var(--ink); font: 14px/1.45 var(--body); }
+.wrap { max-width: 1240px; margin: 0 auto; padding: 0 max(16px, env(safe-area-inset-left, 0px)); }
+.sample { background: var(--ink); color: var(--paper); font-size: 12px; padding: 6px 16px; text-align: center; }
+.bar { background: var(--paper); border-bottom: 1px solid var(--line); }
+.bar .wrap { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-block: 12px; }
+.logo { font-family: var(--display); font-weight: 700; font-size: 24px; display: flex; align-items: center; gap: 10px; }
+.patch-mini { width: 26px; height: 20px; background: var(--leather); border-radius: 3px; outline: 1.5px dashed var(--stitch); outline-offset: -4px; transform: rotate(-4deg); }
+.tally { font-size: 13px; color: var(--muted); text-align: right; line-height: 1.3; }
+.tally b { color: var(--ink); }
+.add { padding-block: 18px 4px; }
+.drop { background: var(--chambray); border-radius: 10px; padding: 18px; display: grid; gap: 12px; }
+.drop h2 { margin: 0; font-family: var(--display); font-size: 21px; }
+.drop p { margin: 0; color: var(--muted); font-size: 13px; }
+.row { display: flex; flex-wrap: wrap; gap: 8px; }
+.in { flex: 1 1 240px; min-width: 0; height: 44px; border: 1px solid var(--line); border-radius: 8px; padding: 0 12px; background: var(--paper); font: inherit; font-size: 15px; color: var(--ink); }
+.btn { height: 44px; padding: 0 16px; border-radius: 8px; border: 1px solid var(--btn); background: var(--btn); color: var(--btn-fg); font: inherit; font-weight: 600; white-space: nowrap; }
+.btn.ghost { background: transparent; color: var(--ink); border-color: var(--line); }
+.toolbar { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; padding-block: 20px 12px; font-size: 13px; }
+.toolbar select { height: 36px; border: 1px solid var(--line); border-radius: 8px; padding: 0 8px; background: var(--paper); color: var(--ink); font: inherit; font-size: 13px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 28px 10px; padding-bottom: 60px; }
+@media (max-width: 440px) { .grid { grid-template-columns: 1fr 1fr; gap: 22px 8px; } }
+.card { display: grid; gap: 4px; min-width: 0; align-content: start; }
+.photo { position: relative; aspect-ratio: 3/4; background: var(--surface); border-radius: 6px; overflow: hidden; }
+.photo svg { width: 100%; height: 100%; display: block; }
+.card.bought .photo svg { opacity: .4; }
+/* The leather patch */
+.patch { position: absolute; right: 10px; top: 10px; background: var(--leather); color: var(--leather-ink); border-radius: 4px; padding: 7px 10px 6px; font-family: var(--display); font-weight: 700; font-size: 14px; line-height: 1.05; text-align: center; transform: rotate(3deg); outline: 1.5px dashed var(--stitch); outline-offset: -4px; box-shadow: 0 1px 0 rgba(61, 39, 20, .25); }
+.patch small { display: block; font-family: var(--body); font-weight: 500; font-size: 10px; }
+.patch.dropped { transform: rotate(-3deg); }
+.patch.bought { background: var(--ink); color: var(--paper); outline-color: var(--denim); }
+.meta { font-size: 12px; color: var(--muted); padding: 6px 2px 0; }
+.title { font-size: 14px; line-height: 1.3; padding: 0 2px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.price { font-family: var(--display); font-weight: 700; font-size: 18px; display: flex; flex-wrap: wrap; gap: 2px 8px; align-items: baseline; padding: 0 2px; font-variant-numeric: tabular-nums; }
+.price.sale .now { color: var(--sale); }
+.mrp { font-family: var(--body); font-weight: 400; font-size: 12px; color: var(--muted); }
+.was { font-size: 12px; color: var(--drop); font-weight: 600; padding: 0 2px; }
+/* Sheet */
+.shade { position: fixed; inset: 0; background: rgba(18, 26, 43, .45); }
+.sheet { position: fixed; top: 0; right: 0; bottom: 0; width: min(440px, 100%); background: var(--paper); padding: 18px; display: grid; gap: 16px; align-content: start; overflow-y: auto; }
+@media (max-width: 560px) { .sheet { top: auto; max-height: 88%; border-radius: 16px 16px 0 0; } }
+.sheet h3 { margin: 0; font-family: var(--display); font-size: 22px; }
+.hero { display: grid; grid-template-columns: 120px 1fr; gap: 14px; }
+.hero h4 { margin: 0 0 4px; font-size: 16px; font-weight: 600; }
+.sec { border-top: 1px solid var(--line); padding-top: 14px; display: grid; gap: 10px; }
+.sec h5 { margin: 0; font-size: 14px; }
+.hist { list-style: none; margin: 0; padding: 0; font-variant-numeric: tabular-nums; }
+.hist li { display: flex; justify-content: space-between; padding: 7px 0; border-bottom: 1px solid var(--line); font-size: 13px; }
+.hist b { font-family: var(--display); font-size: 15px; }
+.down { color: var(--drop); }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { font-size: 13px; background: var(--chambray); border-radius: 999px; padding: 7px 12px; color: var(--ink); text-decoration: none; }
+.x { width: 36px; height: 36px; border-radius: 8px; border: 1px solid var(--line); background: var(--paper); color: var(--ink); font-size: 20px; }
+</style>
+</head>
+<body>
+<div class="sample">Design A: frontend-design skill, sample screen</div>
+<header class="bar"><div class="wrap">
+  <div class="logo"><span class="patch-mini"></span>Wishrack</div>
+  <div class="tally"><b>6</b> to buy<br>worth <b>Rs. 11,494.00</b></div>
+</div></header>
+<section class="wrap add"><div class="drop">
+  <h2>Save something you saw</h2>
+  <p>Share a screenshot or link to Wishrack, paste one here, or pick screenshots from your gallery.</p>
+  <div class="row"><input class="in" placeholder="Paste a product link"><button class="btn">Save link</button><button class="btn ghost">Choose screenshots</button></div>
+</div></section>
+<div class="wrap">
+  <div class="toolbar"><span>Results: 7 items</span><span class="row"><select><option>All stores</option></select><select><option>Newest first</option></select></span></div>
+  <main class="grid" id="grid"></main>
+</div>
+<div id="sheetLayer" hidden>
+  <div class="shade"></div>
+  <aside class="sheet">
+    <div style="display:flex;justify-content:space-between;align-items:center"><h3>Bonkers Corner</h3><button class="x">×</button></div>
+    <div class="hero"><div class="photo" id="sheetPhoto"></div><div>
+      <h4>Black Faded Loose Fit Pants</h4>
+      <div class="price sale"><span class="now">Rs. 1,299.00</span><span class="mrp">MRP <s>Rs. 1,799.00</s></span></div>
+      <div class="was">Dropped from Rs. 1,499.00</div>
+      <div class="row" style="margin-top:10px"><button class="btn" style="height:36px">Go to store</button><button class="btn ghost" style="height:36px">Replace photo</button></div>
+    </div></div>
+    <div class="sec"><h5>Price history</h5>
+      <ul class="hist"><li><span>Today</span><b class="down">Rs. 1,299.00</b></li><li><span>21 Nov</span><b>Rs. 1,499.00</b></li></ul>
+      <button class="btn ghost" style="height:36px;justify-self:start">Check price now</button></div>
+    <div class="sec"><h5>Search other stores</h5>
+      <div class="chips"><a class="chip">Myntra</a><a class="chip">Amazon</a><a class="chip">Flipkart</a><a class="chip">Ajio</a><a class="chip">Google Shopping</a></div></div>
+  </aside>
+</div>
+<script src="data.js"></script>
+<script>
+document.getElementById("grid").innerHTML = ITEMS.map((it) => {
+  const sale = it.mrp && it.mrp > it.price;
+  const patch = it.bought ? `<span class="patch bought">Bought</span>`
+    : it.prev ? `<span class="patch dropped">Down<small>Rs. ${it.prev - it.price}</small></span>`
+    : sale ? `<span class="patch">${Math.round((1 - it.price / it.mrp) * 100)}% off</span>` : "";
+  return `<article class="card${it.bought ? " bought" : ""}">
+    <div class="photo">${garment(it.kind, it.colour)}${patch}</div>
+    <div class="meta">${it.store}</div><div class="title">${it.title}</div>
+    <div class="price${sale ? " sale" : ""}"><span class="now">${money(it.price)}</span>${sale ? `<span class="mrp">MRP <s>${money(it.mrp)}</s></span>` : ""}</div>
+    ${it.prev ? `<div class="was">Dropped from ${money(it.prev)}</div>` : ""}
+  </article>`;
+}).join("");
+document.getElementById("sheetPhoto").innerHTML = garment("pants", "#2b2b2e");
+if (location.hash === "#sheet") document.getElementById("sheetLayer").hidden = false;
+</script>
+</body>
+</html>

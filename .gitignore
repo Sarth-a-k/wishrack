@@ -1,0 +1,12 @@
+node_modules/
+.wrangler/
+# Secrets for local testing (real ones live in Cloudflare)
+.dev.vars
+.env
+# Personal Claude Code settings
+.claude/settings.local.json
+# Impeccable working files (screenshots, decision mockups, question logs)
+.impeccable/questions/
+.impeccable/mocks/
+.impeccable/review/
+.impeccable/config.local.json

@@ -1,0 +1,4 @@
+# Copy this file to .dev.vars for local testing (npm run dev). .dev.vars is never uploaded or committed.
+APP_PASSCODE=pick-a-passcode
+# Optional: paste your Google AI Studio key after the = sign to test screenshot reading locally.
+GEMINI_API_KEY=

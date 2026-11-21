@@ -1,0 +1,31 @@
+# Wishrack: one Cloudflare Worker serves the installable app (./app) and its API (/api/*).
+name = "wishrack"
+main = "worker/index.js"
+compatibility_date = "2025-06-01"
+
+# The app's files. Requests that match a file are served directly; everything else (/api/*) runs the Worker.
+[assets]
+directory = "./app"
+binding = "ASSETS"
+not_found_handling = "single-page-application"
+run_worker_first = ["/api/*", "/share"]
+
+# Your saved items and their photos. Replace database_id with the id that
+# `npx wrangler d1 create wishrack` prints (see SETUP.md, step 3).
+[[d1_databases]]
+binding = "DB"
+database_name = "wishrack"
+database_id = "REPLACE_WITH_YOUR_DATABASE_ID"
+
+# Re-check saved prices once a day (08:00 India time).
+[triggers]
+crons = ["30 2 * * *"]
+
+[vars]
+# Gemini model used to read screenshots and pages. Change it here if Google renames or retires it.
+GEMINI_MODEL = "gemini-2.5-flash"
+
+# Secrets (never put these in this file):
+#   APP_PASSCODE    the passcode you type into the app      ->  npx wrangler secret put APP_PASSCODE
+#   GEMINI_API_KEY  your Google AI Studio key (optional)    ->  npx wrangler secret put GEMINI_API_KEY
+# For local testing, put them in a .dev.vars file instead (see .dev.vars.example).

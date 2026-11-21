@@ -1,0 +1,24 @@
+{
+  "name": "wishrack",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Save products from screenshots and links, compare prices, track price drops.",
+  "type": "module",
+  "scripts": {
+    "icons": "node tools/make-icons.mjs",
+    "mockups": "node tools/serve.mjs mockups 5173",
+    "db:init:local": "wrangler d1 execute wishrack --local --file=worker/schema.sql",
+    "db:seed:local": "wrangler d1 execute wishrack --local --file=worker/seed.sql",
+    "db:init": "wrangler d1 execute wishrack --remote --file=worker/schema.sql",
+    "db:seed": "wrangler d1 execute wishrack --remote --file=worker/seed.sql",
+    "dev": "wrangler dev --port 8787",
+    "deploy": "wrangler deploy"
+  },
+  "devDependencies": {
+    "wrangler": "^4.0.0"
+  },
+  "allowScripts": {
+    "esbuild@0.28.2": true,
+    "workerd@1.20261119.1": true
+  }
+}

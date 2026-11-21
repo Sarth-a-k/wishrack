@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Wishrack</title>
+<meta name="description" content="Save clothes you see, check their prices, go buy them.">
+<meta name="theme-color" content="#141a30">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" href="/icons/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<link rel="preload" href="/fonts/bricolage-grotesque-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/figtree-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/styles.css">
+<script>try{var t=localStorage.getItem("wr.theme");if(t&&t!=="system")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+
+<!-- Passcode screen -->
+<section class="gate" id="gate" hidden aria-labelledby="gateTitle">
+  <div class="gate-inner">
+    <p class="logo"><span class="button-mark" aria-hidden="true"></span>Wishrack</p>
+    <div class="swatch" aria-hidden="true"></div>
+    <h1 id="gateTitle">Your rack is tucked away</h1>
+    <p class="gate-sub">Type the passcode you set when you put Wishrack online. This device will remember it.</p>
+    <form id="gateForm" class="gate-form" autocomplete="on">
+      <label for="gateIn">Passcode</label>
+      <div class="gate-row">
+        <input id="gateIn" type="password" autocomplete="current-password" required>
+        <button class="btn primary" type="submit" id="gateBtn">Open my rack</button>
+      </div>
+    </form>
+    <p class="status err" id="gateMsg" role="alert"></p>
+  </div>
+</section>
+
+<div id="appView" hidden>
+  <header class="bar">
+    <div class="wrap bar-row">
+      <p class="logo"><span class="button-mark" aria-hidden="true"></span>Wishrack</p>
+      <div class="bar-right">
+        <p class="tally" id="tally" aria-live="polite"></p>
+        <button class="icon-btn" id="settingsBtn" type="button" aria-label="Settings">
+          <svg class="ic" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 13.5a7.6 7.6 0 0 0 0-3l2-1.5-2-3.4-2.3 1a7.4 7.4 0 0 0-2.6-1.5L14 2.6h-4l-.5 2.5A7.4 7.4 0 0 0 6.9 6.6l-2.3-1-2 3.4 2 1.5a7.6 7.6 0 0 0 0 3l-2 1.5 2 3.4 2.3-1a7.4 7.4 0 0 0 2.6 1.5l.5 2.5h4l.5-2.5a7.4 7.4 0 0 0 2.6-1.5l2.3 1 2-3.4-2-1.5Z"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <section class="wrap add" aria-labelledby="addTitle">
+    <div class="drop" id="drop">
+      <div class="peerie" aria-hidden="true"></div>
+      <h2 id="addTitle">Save something you saw</h2>
+      <p class="sub">Share a screenshot or link to Wishrack, paste one here, or pick screenshots from your gallery.</p>
+      <form class="link-row" id="linkForm">
+        <label for="linkIn" class="sr">Product link</label>
+        <input class="link-in" id="linkIn" type="url" inputmode="url" placeholder="Paste a product link" autocomplete="off">
+        <button class="btn primary" type="submit">Save</button>
+      </form>
+      <div class="row">
+        <label class="btn ghost" for="fileIn"><svg class="ic" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4.5" width="17" height="15" rx="3"/><circle cx="9" cy="10" r="1.8"/><path d="m4.5 17.5 5-5 4 4 2.5-2.5 3.5 3.5"/></svg>Choose screenshots</label>
+        <input id="fileIn" type="file" accept="image/*" multiple hidden>
+        <button class="btn ghost" id="manualBtn" type="button"><svg class="ic" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16v4Z"/><path d="m13.5 6.5 4 4"/></svg>Add by hand</button>
+      </div>
+      <div class="progress" id="progress" hidden><span id="progressBar"></span></div>
+      <p class="status" id="status" role="status" aria-live="polite"></p>
+    </div>
+    <div class="review" id="review" hidden></div>
+  </section>
+
+  <div class="wrap">
+    <div class="toolbar">
+      <p class="count" id="count"></p>
+      <div class="tools">
+        <label class="sel"><span class="sr">Show store</span><select id="storeSel"></select></label>
+        <label class="sel"><span class="sr">Sort</span><select id="sortSel">
+          <option value="new">Newest first</option>
+          <option value="low">Price, low to high</option>
+          <option value="high">Price, high to low</option>
+          <option value="off">Biggest discount</option>
+          <option value="drop">Recent price drops</option>
+        </select></label>
+      </div>
+    </div>
+    <p class="note" id="note" hidden></p>
+    <main class="grid" id="grid" aria-live="polite"></main>
+  </div>
+</div>
+
+<div class="shade" id="shade" hidden></div>
+<aside class="sheet" id="sheet" hidden role="dialog" aria-modal="true" aria-labelledby="sheetTitle"></aside>
+
+<script src="/app.js" defer></script>
+</body>
+</html>

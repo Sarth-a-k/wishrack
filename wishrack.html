@@ -1,0 +1,762 @@
+<title>Wishrack</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@500;700&family=Instrument+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: quiet retail catalogue, left aligned. Thin brand bar, one add row, results toolbar, 2-to-6 column grid of 3:4 photos.
+   The one loud thing: a kraft-paper hang tag on the photo (discount, cheaper elsewhere, bought). Everything else stays plain. */
+:root {
+  --kraft: #d6c29c;
+  --kraft-ink: #3b2f1a;
+  --bg: #ffffff;
+  --surface: #f3f3f1;
+  --fg: #1b1b1d;
+  --muted: #6c6c72;
+  --line: #e3e3e0;
+  --ink: #1b1b1d;
+  --ink-fg: #ffffff;
+  --sale: #c8102e;
+  --good: #1d7445;
+  --focus: #2f5bd3;
+  --shade: rgba(20, 20, 24, .45);
+  --display: "Archivo Narrow", "Arial Narrow", "Helvetica Neue", Arial, sans-serif;
+  --body: "Instrument Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #121214; --surface: #1d1d21; --fg: #f0f0f1; --muted: #a2a2aa; --line: #2d2d33;
+    --ink: #f0f0f1; --ink-fg: #121214; --sale: #ff6577; --good: #55c98c; --focus: #8aa8ff;
+    --shade: rgba(0, 0, 0, .6); color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #121214; --surface: #1d1d21; --fg: #f0f0f1; --muted: #a2a2aa; --line: #2d2d33;
+  --ink: #f0f0f1; --ink-fg: #121214; --sale: #ff6577; --good: #55c98c; --focus: #8aa8ff;
+  --shade: rgba(0, 0, 0, .6); color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--fg); font-family: var(--body); font-size: 14px; line-height: 1.45; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); }
+.wrap { max-width: 1280px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+button, input, select, textarea { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+a { color: inherit; }
+
+/* Brand bar */
+.bar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg); border-bottom: 1px solid var(--line); }
+.bar .wrap { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-block: 12px; }
+.logo { font-family: var(--display); font-weight: 700; font-size: 23px; letter-spacing: -.01em; display: flex; align-items: center; gap: 9px; }
+.logo-mark { width: 18px; height: 26px; background: var(--kraft); clip-path: polygon(50% 0, 100% 22%, 100% 100%, 0 100%, 0 22%); position: relative; transform: rotate(-8deg); }
+.logo-mark::after { content: ""; position: absolute; left: 50%; top: 6px; width: 5px; height: 5px; margin-left: -2.5px; border-radius: 50%; background: var(--bg); }
+.tally { font-size: 13px; color: var(--muted); text-align: right; font-variant-numeric: tabular-nums; }
+.tally b { color: var(--fg); font-weight: 600; }
+
+/* Add strip */
+.add { padding-block: 18px 6px; }
+.drop { border: 1.5px solid var(--line); border-radius: 6px; padding: 16px; display: grid; gap: 12px; background: var(--bg); transition: border-color .15s, background .15s; }
+.drop.over { border-style: dashed; border-color: var(--ink); background: var(--surface); }
+.drop h2 { margin: 0; font-family: var(--display); font-size: 20px; font-weight: 700; text-wrap: balance; }
+.drop p { margin: 0; color: var(--muted); font-size: 13px; }
+.row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.link-in { flex: 1 1 260px; min-width: 0; height: 42px; border: 1px solid var(--line); border-radius: 4px; padding: 0 12px; background: var(--bg); }
+.btn { height: 42px; padding: 0 16px; border-radius: 4px; border: 1px solid var(--ink); background: var(--ink); color: var(--ink-fg); font-weight: 600; cursor: pointer; white-space: nowrap; display: inline-flex; align-items: center; gap: 8px; text-decoration: none; }
+.btn.ghost { background: transparent; color: var(--fg); border-color: var(--line); }
+.btn.ghost:hover { border-color: var(--fg); }
+.btn.small { height: 34px; padding: 0 12px; font-size: 13px; }
+.btn.danger { background: transparent; color: var(--sale); border-color: var(--sale); }
+.btn:disabled { opacity: .5; cursor: default; }
+.status { display: flex; align-items: center; gap: 10px; font-size: 13px; min-height: 20px; }
+.status.err { color: var(--sale); }
+.spin { width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--line); border-top-color: var(--fg); animation: spin .8s linear infinite; flex: none; }
+@keyframes spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .spin { animation-duration: 2.4s; } }
+.linkish { background: none; border: 0; padding: 0; text-decoration: underline; cursor: pointer; color: var(--fg); font-size: 13px; }
+
+/* Review */
+.review { margin-top: 14px; border: 1px solid var(--line); border-radius: 6px; padding: 16px; display: grid; gap: 14px; }
+.review-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.review-head h3 { margin: 0; font-family: var(--display); font-size: 16px; }
+.rv-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 12px; }
+.rv { display: grid; grid-template-columns: 84px minmax(0, 1fr); gap: 12px; padding: 10px; border: 1px solid var(--line); border-radius: 4px; }
+.rv.off { opacity: .5; }
+.rv-img { width: 84px; aspect-ratio: 3/4; background: var(--surface); border-radius: 3px; overflow: hidden; max-width: 100%; }
+.rv-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.rv-fields { display: grid; gap: 6px; min-width: 0; }
+.rv-fields label, .sheet label { display: grid; gap: 2px; font-size: 12px; color: var(--muted); }
+.rv-fields input, .sheet input, .sheet textarea { width: 100%; min-width: 0; height: 32px; border: 1px solid var(--line); border-radius: 3px; padding: 0 8px; background: var(--bg); font-size: 13px; color: var(--fg); }
+.sheet textarea { height: 64px; padding: 6px 8px; resize: vertical; }
+.pair { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.rv-check { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--fg); }
+
+/* Toolbar + grid */
+.toolbar { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; padding-block: 18px 10px; }
+.count { font-size: 13px; }
+.tools { display: flex; gap: 8px; flex-wrap: wrap; }
+.tools select { height: 34px; border: 1px solid var(--line); border-radius: 4px; padding: 0 8px; background: var(--bg); font-size: 13px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 168px), 1fr)); gap: 28px 4px; padding-bottom: 48px; }
+@media (max-width: 420px) { .grid { grid-template-columns: 1fr 1fr; gap: 22px 4px; } }
+.card { display: grid; gap: 4px; align-content: start; min-width: 0; }
+.photo { display: block; position: relative; aspect-ratio: 3/4; background: var(--surface); overflow: hidden; max-width: 100%; }
+.photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.ph { position: absolute; inset: 0; display: grid; align-content: end; gap: 4px; padding: 14px; color: var(--muted); }
+.ph b { font-family: var(--display); font-size: 30px; line-height: 1; font-weight: 700; color: var(--fg); opacity: .85; overflow-wrap: anywhere; }
+.ph span { font-size: 12px; }
+/* The hang tag: kraft card, clipped top corners, punched hole, string. */
+.tag { position: absolute; right: 10px; top: 14px; transform: rotate(4deg); transform-origin: 50% 0; background: var(--kraft); color: var(--kraft-ink); font-family: var(--display); font-weight: 700; font-size: 13px; line-height: 1.1; padding: 15px 9px 7px; text-align: center; min-width: 46px; max-width: 110px; clip-path: polygon(22% 0, 78% 0, 100% 14px, 100% 100%, 0 100%, 0 14px); filter: drop-shadow(0 1px 0 rgba(0,0,0,.12)); }
+.tag::before { content: ""; position: absolute; left: 50%; top: 5px; width: 6px; height: 6px; margin-left: -3px; border-radius: 50%; background: var(--surface); box-shadow: inset 0 0 0 1px rgba(59,47,26,.35); }
+.tag small { display: block; font-family: var(--body); font-weight: 500; font-size: 10px; margin-top: 2px; }
+.tag.cheaper { transform: rotate(-3deg); }
+.tag.bought { background: var(--ink); color: var(--ink-fg); }
+.info { display: grid; gap: 2px; padding: 6px 4px 0; text-align: left; background: none; border: 0; cursor: pointer; min-width: 0; color: var(--fg); }
+.meta { font-size: 12px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.title { font-size: 14px; line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.price { font-family: var(--display); font-size: 17px; font-weight: 700; font-variant-numeric: tabular-nums; display: flex; flex-wrap: wrap; gap: 2px 8px; align-items: baseline; margin-top: 2px; }
+.price.sale > .now { color: var(--sale); }
+.mrp { font-family: var(--body); font-size: 12px; font-weight: 400; color: var(--muted); }
+.mrp s { text-decoration-thickness: 1px; }
+.off { font-size: 12px; color: var(--sale); font-weight: 600; }
+.noprice { font-size: 13px; font-weight: 500; color: var(--muted); }
+.cheaper { font-size: 12px; color: var(--good); font-weight: 600; }
+.card.bought .photo img, .card.bought .ph { opacity: .45; }
+.empty { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-block: 40px; color: var(--muted); max-width: 60ch; }
+.empty h3 { margin: 0 0 6px; font-family: var(--display); color: var(--fg); font-size: 18px; }
+.note { font-size: 13px; color: var(--muted); padding-block: 4px; }
+
+/* Sheet */
+.shade { position: fixed; inset: 0; background: var(--shade); z-index: 20; }
+.sheet { position: fixed; z-index: 21; top: 0; right: 0; bottom: 0; width: min(460px, 100%); background: var(--bg); border-left: 1px solid var(--line); overflow-y: auto; padding: calc(16px + env(safe-area-inset-top, 0px)) max(18px, env(safe-area-inset-right, 0px)) calc(24px + env(safe-area-inset-bottom, 0px)) 18px; display: grid; gap: 14px; align-content: start; }
+@media (max-width: 560px) { .sheet { top: auto; max-height: 92%; width: 100%; border-left: 0; border-top: 1px solid var(--line); border-radius: 10px 10px 0 0; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); } }
+.sheet-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.sheet-top h3 { margin: 0; font-family: var(--display); font-size: 20px; }
+.x { width: 34px; height: 34px; border: 1px solid var(--line); background: var(--bg); border-radius: 4px; cursor: pointer; font-size: 18px; line-height: 1; }
+.sheet-hero { display: grid; grid-template-columns: 120px minmax(0, 1fr); gap: 14px; align-items: start; }
+.sheet-hero .photo { width: 120px; }
+.sheet-hero h4 { margin: 0 0 4px; font-size: 16px; font-weight: 600; text-wrap: balance; }
+.section { border-top: 1px solid var(--line); padding-top: 14px; display: grid; gap: 10px; }
+.section h5 { margin: 0; font-size: 14px; color: var(--fg); font-weight: 600; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { font-size: 12px; border: 1px solid var(--line); border-radius: 999px; padding: 5px 10px; text-decoration: none; }
+.chip:hover { border-color: var(--fg); }
+table.offers { width: 100%; border-collapse: collapse; font-size: 13px; font-variant-numeric: tabular-nums; }
+.offers th { text-align: left; font-weight: 500; color: var(--muted); font-size: 12px; padding: 4px 6px 6px 0; border-bottom: 1px solid var(--line); }
+.offers td { padding: 8px 6px 8px 0; border-bottom: 1px solid var(--line); vertical-align: top; }
+.offers td.num { text-align: right; white-space: nowrap; font-weight: 600; }
+.offers tr.best td.num { color: var(--good); }
+.offers .sub { color: var(--muted); font-size: 12px; }
+.match { font-size: 11px; padding: 1px 5px; border-radius: 2px; border: 1px solid var(--line); color: var(--muted); }
+.scroll-x { overflow-x: auto; }
+.hint { font-size: 12px; color: var(--muted); }
+</style>
+
+<header class="bar">
+  <div class="wrap">
+    <div class="logo"><span class="logo-mark" aria-hidden="true"></span>Wishrack</div>
+    <div class="tally" id="tally"></div>
+  </div>
+</header>
+
+<section class="add wrap" aria-label="Add a product">
+  <div class="drop" id="drop">
+    <h2>Save something you saw</h2>
+    <p id="dropHint">Paste a screenshot (Ctrl+V), drop one here, or paste a product link.</p>
+    <div class="row">
+      <input class="link-in" id="linkIn" type="url" inputmode="url" placeholder="https://www2.hm.com/en_in/productpage…" aria-label="Product link">
+      <button class="btn" id="linkBtn" type="button">Save link</button>
+      <label class="btn ghost" for="fileIn" style="cursor:pointer">Choose screenshot</label>
+      <input id="fileIn" type="file" accept="image/png,image/jpeg,image/webp,image/gif" multiple hidden>
+      <button class="linkish" id="manualBtn" type="button">Add by hand</button>
+    </div>
+    <div class="status" id="status" role="status" aria-live="polite"></div>
+  </div>
+  <div class="review" id="review" hidden></div>
+</section>
+
+<div class="wrap">
+  <div class="toolbar">
+    <div class="count" id="count">Results: 0 items</div>
+    <div class="tools">
+      <select id="storeSel" aria-label="Filter by store"><option value="all">All stores</option></select>
+      <select id="sortSel" aria-label="Sort">
+        <option value="new">Newest first</option>
+        <option value="low">Price: low to high</option>
+        <option value="high">Price: high to low</option>
+        <option value="off">Biggest discount</option>
+      </select>
+    </div>
+  </div>
+  <div class="note" id="note" hidden></div>
+  <main class="grid" id="grid" aria-live="polite"></main>
+</div>
+
+<div class="shade" id="shade" hidden></div>
+<aside class="sheet" id="sheet" hidden aria-modal="true" role="dialog" aria-labelledby="sheetTitle"></aside>
+
+<script>
+(() => {
+  "use strict";
+  // ---------- helpers ----------
+  const $ = (s) => document.querySelector(s);
+  function h(tag, attrs, ...kids) {
+    const el = document.createElement(tag);
+    for (const [k, v] of Object.entries(attrs || {})) {
+      if (v == null || v === false) continue;
+      if (k === "class") el.className = v;
+      else if (k === "text") el.textContent = v;
+      else if (k.startsWith("on") && typeof v === "function") el.addEventListener(k.slice(2), v);
+      else el.setAttribute(k, v === true ? "" : String(v));
+    }
+    for (const kid of kids.flat()) {
+      if (kid == null || kid === false) continue;
+      el.append(kid.nodeType ? kid : document.createTextNode(String(kid)));
+    }
+    return el;
+  }
+  const num = (v) => { if (v == null || v === "") return null; const n = Number(String(v).replace(/[^0-9.]/g, "")); return isFinite(n) && n > 0 ? n : null; };
+  function money(n, cur) {
+    if (n == null) return "";
+    cur = cur || "INR";
+    if (cur === "INR") return "Rs. " + Number(n).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    try { return new Intl.NumberFormat("en", { style: "currency", currency: cur }).format(n); } catch { return cur + " " + n; }
+  }
+  const newId = () => "i" + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+  const isUrl = (s) => /^https?:\/\/\S+\.\S+/i.test(String(s || "").trim());
+  const hostOf = (u) => { try { return new URL(u).hostname.replace(/^www\d?\./, ""); } catch { return ""; } };
+  const daysAgo = (t) => { if (!t) return ""; const d = Math.floor((Date.now() - t) / 864e5); return d <= 0 ? "today" : d === 1 ? "yesterday" : d + " days ago"; };
+  const query = (it) => [it.brand && !String(it.title || "").toLowerCase().includes(String(it.brand).toLowerCase()) ? it.brand : (it.store || ""), it.title].filter(Boolean).join(" ").trim();
+
+  const STORES = [
+    { name: "Myntra", url: (q) => "https://www.myntra.com/" + encodeURIComponent(q.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")) + "?rawQuery=" + encodeURIComponent(q) },
+    { name: "Amazon", url: (q) => "https://www.amazon.in/s?k=" + encodeURIComponent(q) },
+    { name: "Flipkart", url: (q) => "https://www.flipkart.com/search?q=" + encodeURIComponent(q) },
+    { name: "Ajio", url: (q) => "https://www.ajio.com/search/?text=" + encodeURIComponent(q) },
+  ];
+  const googleShop = (q) => "https://www.google.com/search?tbm=shop&q=" + encodeURIComponent(q);
+  const storeLink = (it) => it.url || "https://www.google.com/search?q=" + encodeURIComponent(query(it) + " " + (it.domain || it.store || ""));
+  const imgSrc = (it) => it.imageId ? "/_blob/" + it.imageId : (it.imageData || "");
+
+  // ---------- state ----------
+  const state = { items: [], mode: "loading", store: "all", sort: "new", review: null, openId: null, note: "" };
+  let col = null, sample = null, canImages = false, assets = null, mcp = null, hasBrowser = false, tabId = null, ctl = null;
+  try { state.sort = localStorage.getItem("wr.sort") || "new"; } catch {}
+
+  // ---------- storage ----------
+  function loadLocal() { try { state.items = JSON.parse(localStorage.getItem("wr.items") || "[]"); } catch { state.items = []; } }
+  function saveLocal() { try { localStorage.setItem("wr.items", JSON.stringify(state.items)); } catch {} }
+  async function putItem(item) {
+    const { id, ...body } = item;
+    body.updatedAt = Date.now();
+    const clean = JSON.parse(JSON.stringify(body));
+    if (state.mode === "db") {
+      try { await col.doc(id).set(clean); }
+      catch (e) {
+        if (e && e.code === "invalid_argument") throw new Error("Only the owner of this page can save items here.");
+        if (e && e.code === "quota_exceeded") throw new Error("Storage is full. Delete a few old items and try again.");
+        await new Promise((r) => setTimeout(r, 600 + Math.random() * 600));
+        await col.doc(id).set(clean);
+      }
+    } else {
+      const i = state.items.findIndex((x) => x.id === id);
+      if (i >= 0) state.items[i] = { id, ...clean }; else state.items.push({ id, ...clean });
+      saveLocal(); render();
+    }
+  }
+  async function removeItem(it) {
+    if (state.mode === "db") await col.doc(it.id).delete();
+    else { state.items = state.items.filter((x) => x.id !== it.id); saveLocal(); render(); }
+    if (it.imageId && assets) assets.delete(it.imageId).catch(() => {});
+  }
+
+  // ---------- images ----------
+  function loadImg(blob) {
+    return new Promise((res, rej) => { const u = URL.createObjectURL(blob); const im = new Image(); im.onload = () => res(im); im.onerror = () => rej(new Error("image")); im.src = u; });
+  }
+  function normBox(b, W, H) {
+    if (!Array.isArray(b) || b.length !== 4 || !b.every((n) => typeof n === "number" && isFinite(n))) return null;
+    let [x0, y0, x1, y1] = b;
+    if (Math.max(x0, y0, x1, y1) > 1.5) { x0 /= W; x1 /= W; y0 /= H; y1 /= H; }
+    if (x1 < x0) [x0, x1] = [x1, x0];
+    if (y1 < y0) [y0, y1] = [y1, y0];
+    x0 = Math.max(0, x0); y0 = Math.max(0, y0); x1 = Math.min(1, x1); y1 = Math.min(1, y1);
+    if (x1 - x0 < 0.06 || y1 - y0 < 0.06) return null;
+    return [x0, y0, x1, y1];
+  }
+  async function crop(blob, box, maxW = 900, q = 0.86) {
+    const im = await loadImg(blob);
+    const W = im.naturalWidth, H = im.naturalHeight;
+    const b = normBox(box, W, H) || [0, 0, 1, 1];
+    const sx = b[0] * W, sy = b[1] * H, sw = (b[2] - b[0]) * W, sh = (b[3] - b[1]) * H;
+    const scale = Math.min(1, maxW / sw);
+    const c = document.createElement("canvas");
+    c.width = Math.max(1, Math.round(sw * scale)); c.height = Math.max(1, Math.round(sh * scale));
+    c.getContext("2d").drawImage(im, sx, sy, sw, sh, 0, 0, c.width, c.height);
+    URL.revokeObjectURL(im.src);
+    return new Promise((r) => c.toBlob((x) => r(x || blob), "image/jpeg", q));
+  }
+  const toDataUrl = (blob) => new Promise((r) => { const fr = new FileReader(); fr.onload = () => r(fr.result); fr.readAsDataURL(blob); });
+  async function storeImage(blob) {
+    if (!blob) return {};
+    if (assets) {
+      try { const r = await assets.upload(blob, { type: "image/jpeg" }); return { imageId: r.id }; } catch {}
+    }
+    const small = await crop(blob, null, 360, 0.72);
+    return { imageData: await toDataUrl(small) };
+  }
+  function b64ToBlob(b64, type) { const bin = atob(b64); const u = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i); return new Blob([u], { type: type || "image/png" }); }
+
+  // ---------- status ----------
+  function setStatus(msg, opts = {}) {
+    const el = $("#status");
+    el.replaceChildren();
+    el.className = "status" + (opts.err ? " err" : "");
+    if (!msg) return;
+    if (opts.busy) el.append(h("span", { class: "spin", "aria-hidden": "true" }));
+    el.append(h("span", { text: msg }));
+    if (opts.busy && ctl) el.append(h("button", { class: "linkish", type: "button", onclick: () => ctl && ctl.abort() }, "Stop"));
+  }
+  function sampleMsg(e) {
+    const c = e && e.code;
+    if (c === "not_granted" || c === "sampling_disabled" || c === "capability_disabled" || c === "not_declared") { sample = null; updateHint(); return "Claude can't read screenshots on this page right now. You can still add items by hand."; }
+    if (c === "rate_limited") return e.reason === "usage_limit" ? "You've reached your Claude usage limit. Try again later." : "Too many requests at once. Wait a moment and try again.";
+    if (c === "image_rejected") return "That image couldn't be read. Try a PNG or JPG screenshot.";
+    if (c === "images_unavailable") { canImages = false; updateHint(); return "Screenshots can't be read in this view. Paste a link or add it by hand."; }
+    if (c === "invalid_json" || c === "empty_completion" || c === "refused") return "Couldn't find a product in that. Try a clearer screenshot, or add it by hand.";
+    if (c === "cancelled") return "Stopped.";
+    if (c === "session_expired") return "Your Claude session expired. Sign in again and reload.";
+    return "Couldn't reach Claude. Check your connection and try again.";
+  }
+  function mcpMsg(e) {
+    const c = e && e.code;
+    if (c === "server_not_connected" || c === "not_granted" || c === "capability_disabled" || c === "capability_removed") { hasBrowser = false; return "The browser is only reachable when this page is open in the Claude desktop app."; }
+    if (c === "cancelled") return "The browser request was declined.";
+    if (c === "approval_required" || c === "not_in_manifest") return "This page needs your OK to use the browser. Try again and choose Allow.";
+    if (c === "tool_error") return "The browser couldn't open that page.";
+    return "The browser didn't answer. Try again.";
+  }
+
+  // ---------- browser (Claude desktop app only) ----------
+  const textOf = (r) => ((r && r.content) || []).filter((b) => b.type === "text").map((b) => b.text).join("\n");
+  const btool = (tool, input, signal) => mcp.callTool("host:claude_browser", tool, input, { cache: false, signal });
+  async function openInBrowser(url, signal) {
+    if (tabId) {
+      try { await btool("navigate", { url, tabId }, signal); return; } catch (e) { if (e && e.code === "cancelled") throw e; tabId = null; }
+    }
+    const r = await btool("preview_start", { url }, signal);
+    const t = textOf(r);
+    try { tabId = JSON.parse(t.slice(t.indexOf("{"), t.lastIndexOf("}") + 1)).tabId || null; } catch { const m = t.match(/"tabId"\s*:\s*"([^"]+)"/); tabId = m ? m[1] : null; }
+  }
+  async function readPage(max, signal) {
+    for (let i = 0; i < 4; i++) {
+      try { return textOf(await btool("get_page_text", tabId ? { tabId, max_chars: max } : { max_chars: max }, signal)); }
+      catch (e) { if (e && e.code === "cancelled") throw e; if (i === 3) throw e; await new Promise((r) => setTimeout(r, 1800)); }
+    }
+    return "";
+  }
+  async function shootPage(signal) {
+    try {
+      const r = await btool("computer", tabId ? { action: "screenshot", tabId } : { action: "screenshot" }, signal);
+      const img = (r.content || []).find((b) => b.type === "image" && b.data);
+      return img ? b64ToBlob(img.data, img.mimeType) : null;
+    } catch (e) { if (e && e.code === "cancelled") throw e; return null; }
+  }
+
+  // ---------- Claude prompts ----------
+  const FIELDS = `For each product return:
+- title: the product name as written, without the brand prefix
+- brand: the brand, if shown, else null
+- store: who sells it (for example "H&M", "Uniqlo", "Bonkers Corner"); for an Instagram ad, the advertiser
+- domain: the store's website domain if you know it confidently (for example "www2.hm.com", "uniqlo.com", "bonkerscorner.com"), else null
+- url: a full product URL only if it is given or fully visible, else null
+- price: the current selling price as a plain number, or null if none is shown
+- mrp: the original or struck-through price as a plain number, or null
+- currency: ISO code; "INR" when prices show Rs. or ₹
+- colour: the colour if shown, else null
+- bbox: [x0, y0, x1, y1], the product photo's box in the image as fractions of its width and height (0 to 1), tight around the photo; null if there is no photo
+Never guess a price. Reply with only JSON: {"items":[ ... ]}`;
+  const SHOT_PROMPT = `You read shopping screenshots for a personal wishlist app. A screenshot may come from a store website or app, an Instagram ad, post or reel, or a chat.
+Find the products the person wants to save. Usually that is ONE main product. If the screenshot is a product grid or list, include every product that shows its own name and price (at most 8), in reading order.
+${FIELDS}`;
+  const linkPrompt = (url, text) => `You read a product page for a personal wishlist app. The page's URL is ${url}. The image, if any, is a screenshot of the top of the page. The page text follows.
+Return the ONE main product on this page; set url to "${url}".
+${FIELDS}
+
+PAGE TEXT:
+${String(text || "").slice(0, 9000)}`;
+  const urlOnlyPrompt = (url) => `A person saved this shopping link: ${url}
+You cannot open it. From the URL alone, work out the product's likely title (from the path words; null if the path has none), the store and the domain. Set url to the link, price, mrp and bbox to null.
+${FIELDS}`;
+
+  // ---------- adding ----------
+  function startReview(source) { state.review = { source, items: [] }; renderReview(); }
+  function addReviewItem(raw, blob) {
+    if (!state.review) startReview("manual");
+    state.review.items.push({
+      key: newId(), checked: true,
+      title: raw.title || "", brand: raw.brand || "", store: raw.store || "", domain: raw.domain || "",
+      url: isUrl(raw.url) ? raw.url : "", price: num(raw.price), mrp: num(raw.mrp), currency: raw.currency || "INR",
+      colour: raw.colour || "", blob: blob || null, preview: blob ? URL.createObjectURL(blob) : "",
+    });
+  }
+  async function handleImages(files) {
+    files = [...files].filter((f) => /^image\//.test(f.type));
+    if (!files.length) return;
+    if (!sample || !canImages) {
+      startReview("manual");
+      for (const f of files) addReviewItem({}, await crop(f, null));
+      renderReview();
+      setStatus(sample ? "Screenshots can't be read in this view. Fill in the details below." : "Fill in the details below.");
+      return;
+    }
+    if (!state.review) startReview("screenshot");
+    for (let i = 0; i < files.length; i++) {
+      const f = files[i];
+      ctl = new AbortController();
+      setStatus(files.length > 1 ? `Reading screenshot ${i + 1} of ${files.length}…` : "Reading your screenshot…", { busy: true });
+      try {
+        const out = await sample.json(SHOT_PROMPT, { images: [f], signal: ctl.signal, modelTier: "default" });
+        const list = Array.isArray(out && out.items) ? out.items : Array.isArray(out) ? out : [];
+        if (!list.length) { setStatus("No product found in that screenshot. Add it by hand if you like.", { err: true }); continue; }
+        for (const it of list.slice(0, 8)) addReviewItem(it, await crop(f, it.bbox));
+        renderReview();
+        setStatus("");
+      } catch (e) {
+        setStatus(sampleMsg(e), { err: e && e.code !== "cancelled" });
+        if (e && e.code === "cancelled") break;
+      } finally { ctl = null; }
+    }
+    if (state.review && !state.review.items.length) { state.review = null; renderReview(); }
+  }
+  async function handleLink(url) {
+    url = String(url || "").trim();
+    if (!isUrl(url)) { setStatus("That doesn't look like a link. It should start with https://", { err: true }); return; }
+    $("#linkIn").value = "";
+    if (!sample) { startReview("manual"); addReviewItem({ url, store: hostOf(url) }); renderReview(); setStatus("Add the price and name below."); return; }
+    ctl = new AbortController();
+    const signal = ctl.signal;
+    try {
+      if (hasBrowser) {
+        setStatus("Opening the page in the browser…", { busy: true });
+        let text = "", shot = null;
+        try {
+          await openInBrowser(url, signal);
+          text = await readPage(12000, signal);
+          shot = canImages ? await shootPage(signal) : null;
+        } catch (e) {
+          if (e && e.code === "cancelled") throw e;
+          setStatus(mcpMsg(e) + " Saving from the link alone…", { busy: true });
+        }
+        if (text) {
+          setStatus("Reading the product details…", { busy: true });
+          const out = await sample.json(linkPrompt(url, text), { images: shot ? [shot] : undefined, signal, modelTier: "default" });
+          const it = (out && out.items && out.items[0]) || null;
+          if (it) {
+            startReview("link");
+            addReviewItem({ ...it, url }, shot && normBox(it.bbox, 1, 1) ? await crop(shot, it.bbox) : null);
+            renderReview();
+            setStatus(shot && normBox(it.bbox, 1, 1) ? "" : "Got the details. Add a screenshot for a photo if you like.");
+            return;
+          }
+        }
+      }
+      setStatus("Reading the link…", { busy: true });
+      const out = await sample.json(urlOnlyPrompt(url), { signal, modelTier: "quick" });
+      const it = (out && out.items && out.items[0]) || {};
+      startReview("link");
+      addReviewItem({ ...it, url, price: null, mrp: null });
+      renderReview();
+      setStatus(hasBrowser ? "Couldn't read the page itself. Add the price below." : "Saved the link. Add the price below, or drop a screenshot of the product for its photo and price. (Reading prices from links works in the Claude desktop app.)");
+    } catch (e) {
+      setStatus(e && e.code ? sampleMsg(e) : mcpMsg(e), { err: !(e && e.code === "cancelled") });
+    } finally { ctl = null; }
+  }
+
+  // ---------- compare ----------
+  async function compare(it) {
+    if (!sample || !hasBrowser) return;
+    ctl = new AbortController();
+    const signal = ctl.signal;
+    const q = query(it);
+    const texts = [];
+    const sheetStatus = (msg, busy, err) => { const el = $("#cmpStatus"); if (!el) return; el.replaceChildren(); el.className = "status" + (err ? " err" : ""); if (busy) el.append(h("span", { class: "spin", "aria-hidden": "true" })); el.append(h("span", { text: msg })); if (busy) el.append(h("button", { class: "linkish", type: "button", onclick: () => ctl && ctl.abort() }, "Stop")); };
+    const btn = $("#cmpBtn"); if (btn) btn.disabled = true;
+    try {
+      for (let i = 0; i < STORES.length; i++) {
+        const s = STORES[i];
+        sheetStatus(`Checking ${s.name} (${i + 1} of ${STORES.length})…`, true);
+        try {
+          await openInBrowser(s.url(q), signal);
+          await new Promise((r) => setTimeout(r, 1200));
+          const t = await readPage(7000, signal);
+          texts.push({ store: s.name, search_url: s.url(q), text: t.slice(0, 7000) });
+        } catch (e) {
+          if (e && e.code === "cancelled") throw e;
+          if (e && (e.code === "server_not_connected" || e.code === "not_granted")) throw e;
+        }
+      }
+      if (!texts.length) { sheetStatus("Couldn't open any store pages. Try again.", false, true); return; }
+      sheetStatus("Comparing listings…", true);
+      const prompt = `You compare prices for one product across Indian shopping sites, for a wishlist app.
+PRODUCT: ${q}${it.colour ? " (colour: " + it.colour + ")" : ""}. Sold by ${it.store || "unknown"} at ${it.price != null ? money(it.price, it.currency) : "unknown price"}.
+Below is the text of each store's search results page. Use only prices that appear in that text. For each store, pick the listing that is the same product (same brand and same style name) as "exact"; if there is none, the closest listing from the same brand as "similar". Skip a store whose text has no relevant listing, or that looks like a block, captcha or error page. Never invent a listing.
+Reply with only JSON: {"offers":[{"store":"Myntra","title":"listing name","price":1499,"mrp":1799,"match":"exact"}],"summary":"one short plain sentence comparing them with the saved price"}
+
+${texts.map((t) => `=== ${t.store} ===\n${t.text}`).join("\n\n")}`;
+      const out = await sample.json(prompt, { signal, modelTier: "default" });
+      const offers = (Array.isArray(out && out.offers) ? out.offers : []).map((o) => {
+        const src = texts.find((t) => t.store.toLowerCase() === String(o.store || "").toLowerCase());
+        return { store: String(o.store || ""), title: String(o.title || ""), price: num(o.price), mrp: num(o.mrp), match: o.match === "exact" ? "exact" : "similar", url: src ? src.search_url : "" };
+      }).filter((o) => o.store && o.price != null);
+      const fresh = state.items.find((x) => x.id === it.id) || it;
+      await putItem({ ...fresh, offers, compareSummary: String((out && out.summary) || ""), comparedAt: Date.now() });
+      if (state.mode !== "db") openSheet(it.id);
+      sheetStatus(offers.length ? "" : "No matching listings found on these stores.", false);
+    } catch (e) {
+      sheetStatus(e && e.code && "cancelled" === e.code ? "Stopped." : (e && ("upstream_error" === e.code || "invalid_json" === e.code || "rate_limited" === e.code || "not_granted" === e.code)) ? sampleMsg(e) : mcpMsg(e), false, !(e && e.code === "cancelled"));
+    } finally { ctl = null; const b = $("#cmpBtn"); if (b) b.disabled = false; }
+  }
+
+  // ---------- render: tally, toolbar, grid ----------
+  function visibleItems() {
+    let list = state.items.slice();
+    if (state.store !== "all") list = list.filter((x) => (x.store || "Other") === state.store);
+    const p = (x) => x.price == null ? Infinity : x.price;
+    const off = (x) => x.mrp && x.price ? (x.mrp - x.price) / x.mrp : 0;
+    if (state.sort === "low") list.sort((a, b) => p(a) - p(b));
+    else if (state.sort === "high") list.sort((a, b) => (b.price ?? -1) - (a.price ?? -1));
+    else if (state.sort === "off") list.sort((a, b) => off(b) - off(a));
+    else list.sort((a, b) => (b.addedAt || 0) - (a.addedAt || 0));
+    list.sort((a, b) => (a.bought ? 1 : 0) - (b.bought ? 1 : 0));
+    return list;
+  }
+  function bestOffer(it) {
+    const o = (it.offers || []).filter((x) => x.match === "exact" && x.price != null).sort((a, b) => a.price - b.price)[0];
+    return o && it.price != null && o.price < it.price ? o : null;
+  }
+  function priceLine(it, big) {
+    if (it.price == null) return h("div", { class: "price" }, h("span", { class: "noprice", text: "Add price" }));
+    const sale = it.mrp && it.mrp > it.price;
+    return h("div", { class: "price" + (sale ? " sale" : ""), style: big ? "font-size:18px" : null },
+      h("span", { class: "now", text: money(it.price, it.currency) }),
+      sale ? h("span", { class: "mrp" }, "MRP ", h("s", { text: money(it.mrp, it.currency) })) : null,
+      sale ? h("span", { class: "off", text: "-" + Math.round((1 - it.price / it.mrp) * 100) + "%" }) : null);
+  }
+  function photo(it, cls) {
+    const src = imgSrc(it);
+    const a = h("a", { class: "photo" + (cls ? " " + cls : ""), href: storeLink(it), target: "_blank", rel: "noopener noreferrer", "aria-label": "Open " + (it.title || "product") + " at " + (it.store || "the store") });
+    const ph = h("div", { class: "ph" }, h("b", { text: (it.store || it.brand || "?").slice(0, 14) }), h("span", { text: it.title || "" }));
+    if (src) {
+      const img = h("img", { src, alt: it.title || "Product photo", loading: "lazy" });
+      img.addEventListener("error", () => img.replaceWith(ph));
+      a.append(img);
+    } else a.append(ph);
+    const best = bestOffer(it);
+    if (it.bought) a.append(h("span", { class: "tag bought", text: "Bought" }));
+    else if (best) a.append(h("span", { class: "tag cheaper" }, "Cheaper", h("small", { text: "at " + best.store })));
+    else if (it.mrp && it.price && it.mrp > it.price) a.append(h("span", { class: "tag" }, Math.round((1 - it.price / it.mrp) * 100) + "% off"));
+    return a;
+  }
+  function render() {
+    const items = state.items;
+    const live = items.filter((x) => !x.bought);
+    const total = live.reduce((s, x) => s + (x.currency === "INR" || !x.currency ? (x.price || 0) : 0), 0);
+    $("#tally").replaceChildren(h("b", { text: String(live.length) }), " to buy", total ? h("br") : null, total ? h("span", null, "worth ", h("b", { text: money(total, "INR") })) : null);
+
+    const stores = [...new Set(items.map((x) => x.store || "Other"))].sort();
+    if (state.store !== "all" && !stores.includes(state.store)) state.store = "all";
+    $("#storeSel").replaceChildren(h("option", { value: "all", text: "All stores" }), ...stores.map((s) => h("option", { value: s, text: s })));
+    $("#storeSel").value = state.store;
+    $("#sortSel").value = state.sort;
+
+    const list = visibleItems();
+    $("#count").textContent = "Results: " + list.length + (list.length === 1 ? " item" : " items");
+    const note = $("#note"); note.hidden = !state.note; note.textContent = state.note;
+
+    const grid = $("#grid");
+    if (state.mode === "loading") { grid.replaceChildren(h("div", { class: "empty" }, h("h3", { text: "Loading your rack…" }), h("p", { text: "Your saved products will appear here." }))); return; }
+    if (!list.length) {
+      grid.replaceChildren(h("div", { class: "empty" },
+        h("h3", { text: items.length ? "Nothing from this store" : "Your rack is empty" }),
+        h("p", { text: items.length ? "Pick All stores to see everything." : "Screenshot a product you like (from Instagram, a store app, anywhere), then paste or choose it above. Claude reads the name, price and store, and the photo becomes a card here. Tap a card's photo to go straight to the store." })));
+      return;
+    }
+    grid.replaceChildren(...list.map((it) => {
+      const best = bestOffer(it);
+      return h("article", { class: "card" + (it.bought ? " bought" : "") },
+        photo(it),
+        h("button", { class: "info", type: "button", onclick: () => openSheet(it.id), "aria-label": "Details for " + (it.title || "product") },
+          h("span", { class: "meta", text: it.store || "Saved " + daysAgo(it.addedAt) }),
+          h("span", { class: "title", text: it.title || "Untitled product" }),
+          priceLine(it),
+          best ? h("span", { class: "cheaper", text: "Lower at " + best.store + ": " + money(best.price, it.currency) }) : null));
+    }));
+    if (state.openId) renderSheet();
+  }
+
+  // ---------- render: review ----------
+  function renderReview() {
+    const box = $("#review");
+    const r = state.review;
+    if (!r || !r.items.length) { box.hidden = true; box.replaceChildren(); return; }
+    box.hidden = false;
+    const n = r.items.filter((x) => x.checked).length;
+    const field = (it, key, label, type) => h("label", null, label, h("input", { id: "rv-" + it.key + "-" + key, type: type || "text", inputmode: type === "number" ? "decimal" : null, value: it[key] ?? "", oninput: (e) => { it[key] = type === "number" ? num(e.target.value) : e.target.value; } }));
+    box.replaceChildren(
+      h("div", { class: "review-head" },
+        h("h3", { text: r.items.length > 1 ? `Found ${r.items.length} products. Check the details.` : "Check the details, then save" }),
+        h("span", { class: "hint", text: "Fix anything Claude got wrong." })),
+      h("div", { class: "rv-list" }, r.items.map((it) => h("div", { class: "rv" + (it.checked ? "" : " off") },
+        h("div", { class: "rv-img" }, it.preview ? h("img", { src: it.preview, alt: "" }) : h("div", { class: "ph" }, h("span", { text: "No photo" }))),
+        h("div", { class: "rv-fields" },
+          r.items.length > 1 ? h("label", { class: "rv-check" }, h("input", { type: "checkbox", id: "rv-" + it.key + "-on", checked: it.checked, onchange: (e) => { it.checked = e.target.checked; renderReview(); } }), "Save this one") : null,
+          field(it, "title", "Name"),
+          h("div", { class: "pair" }, field(it, "store", "Store"), field(it, "colour", "Colour")),
+          h("div", { class: "pair" }, field(it, "price", "Price", "number"), field(it, "mrp", "MRP", "number")),
+          field(it, "url", "Link (optional)", "url"))))),
+      h("div", { class: "row" },
+        h("button", { class: "btn", type: "button", id: "saveReview", disabled: n === 0, onclick: saveReview }, n > 1 ? `Save ${n} items` : "Save to rack"),
+        h("button", { class: "btn ghost", type: "button", onclick: () => { state.review = null; renderReview(); setStatus(""); } }, "Discard")));
+  }
+  async function saveReview() {
+    const r = state.review; if (!r) return;
+    const btn = $("#saveReview"); btn.disabled = true;
+    setStatus("Saving…", { busy: true });
+    try {
+      for (const it of r.items.filter((x) => x.checked)) {
+        const img = await storeImage(it.blob);
+        await putItem({ id: newId(), title: it.title.trim(), brand: it.brand, store: it.store.trim() || hostOf(it.url) || "", domain: it.domain || hostOf(it.url), url: isUrl(it.url) ? it.url.trim() : "", price: it.price, mrp: it.mrp, currency: it.currency || "INR", colour: it.colour, addedAt: Date.now(), bought: false, offers: [], ...img });
+        if (it.preview) URL.revokeObjectURL(it.preview);
+      }
+      state.review = null; renderReview(); setStatus("Saved.");
+      setTimeout(() => { if ($("#status").textContent === "Saved.") setStatus(""); }, 2500);
+    } catch (e) {
+      setStatus((e && e.message) || "Couldn't save. Try again.", { err: true }); btn.disabled = false;
+    }
+  }
+
+  // ---------- render: sheet ----------
+  function openSheet(id) { state.openId = id; renderSheet(); }
+  function closeSheet() { state.openId = null; $("#sheet").hidden = true; $("#shade").hidden = true; }
+  let delArmed = false;
+  function renderSheet() {
+    const it = state.items.find((x) => x.id === state.openId);
+    const sheet = $("#sheet");
+    if (!it) { closeSheet(); return; }
+    if (document.activeElement && sheet.contains(document.activeElement) && document.activeElement.matches("input,textarea")) return; // don't clobber typing
+    sheet.hidden = false; $("#shade").hidden = false;
+    const draft = { ...it };
+    const f = (key, label, type) => h("label", null, label, h("input", { id: "ed-" + key, type: type || "text", inputmode: type === "number" ? "decimal" : null, value: it[key] ?? "", oninput: (e) => { draft[key] = type === "number" ? num(e.target.value) : e.target.value; } }));
+    const q = query(it);
+    const offers = (it.offers || []).slice().sort((a, b) => a.price - b.price);
+    const cheapest = offers.filter((o) => o.match === "exact")[0];
+    const replaceIn = h("input", { type: "file", id: "ed-photo", accept: "image/png,image/jpeg,image/webp", hidden: true, onchange: async (e) => {
+      const file = e.target.files && e.target.files[0]; if (!file) return;
+      const img = await storeImage(await crop(file, null));
+      const old = it.imageId;
+      await putItem({ ...(state.items.find((x) => x.id === it.id) || it), imageId: null, imageData: null, ...img });
+      if (old && assets && old !== img.imageId) assets.delete(old).catch(() => {});
+    } });
+    sheet.replaceChildren(
+      h("div", { class: "sheet-top" }, h("h3", { id: "sheetTitle", text: it.store || "Product" }), h("button", { class: "x", type: "button", "aria-label": "Close", onclick: closeSheet }, "×")),
+      h("div", { class: "sheet-hero" }, photo(it), h("div", null,
+        h("h4", { text: it.title || "Untitled product" }),
+        priceLine(it, true),
+        h("p", { class: "hint", text: [it.colour, it.size ? "size " + it.size : "", "saved " + daysAgo(it.addedAt)].filter(Boolean).join(", ").replace(/^./, (c) => c.toUpperCase()) }),
+        h("div", { class: "row", style: "margin-top:8px" },
+          h("a", { class: "btn small", href: storeLink(it), target: "_blank", rel: "noopener noreferrer" }, it.url ? "Go to store" : "Find it online"),
+          h("label", { class: "btn small ghost", for: "ed-photo", style: "cursor:pointer" }, imgSrc(it) ? "Replace photo" : "Add photo"), replaceIn))),
+      h("div", { class: "section" },
+        h("h5", { text: "Compare prices" }),
+        hasBrowser && sample
+          ? h("div", { class: "row" }, h("button", { class: "btn small", id: "cmpBtn", type: "button", onclick: () => compare(it) }, it.comparedAt ? "Check again" : "Check Myntra, Amazon, Flipkart, Ajio"), it.comparedAt ? h("span", { class: "hint", text: "Last checked " + daysAgo(it.comparedAt) }) : null)
+          : h("p", { class: "hint", text: "Automatic price checks open store pages in the Claude desktop app's browser, so they run when this page is open there on your laptop. Here, search each store yourself:" }),
+        h("div", { class: "status", id: "cmpStatus", role: "status", "aria-live": "polite" }),
+        offers.length ? h("div", { class: "scroll-x" }, h("table", { class: "offers" },
+          h("thead", null, h("tr", null, h("th", { text: "Store" }), h("th", { text: "Listing" }), h("th", { text: "Price", style: "text-align:right" }))),
+          h("tbody", null,
+            it.price != null ? h("tr", null, h("td", null, it.store || "Saved", h("div", { class: "sub", text: "your saved price" })), h("td", { class: "sub", text: it.title || "" }), h("td", { class: "num", text: money(it.price, it.currency) })) : null,
+            offers.map((o) => h("tr", { class: o === cheapest && it.price != null && o.price < it.price ? "best" : "" },
+              h("td", null, o.url ? h("a", { href: o.url, target: "_blank", rel: "noopener noreferrer", text: o.store }) : o.store),
+              h("td", null, h("span", { text: o.title }), " ", h("span", { class: "match", text: o.match })),
+              h("td", { class: "num" }, money(o.price, it.currency), o.mrp && o.mrp > o.price ? h("div", { class: "sub" }, h("s", { text: money(o.mrp, it.currency) })) : null)))))) : null,
+        it.compareSummary ? h("p", { class: "hint", text: it.compareSummary }) : null,
+        h("div", { class: "chips" }, STORES.map((s) => h("a", { class: "chip", href: s.url(q), target: "_blank", rel: "noopener noreferrer", text: "Search " + s.name })), h("a", { class: "chip", href: googleShop(q), target: "_blank", rel: "noopener noreferrer", text: "Google Shopping" }))),
+      h("div", { class: "section" },
+        h("h5", { text: "Details" }),
+        f("title", "Name"),
+        h("div", { class: "pair" }, f("store", "Store"), f("colour", "Colour")),
+        h("div", { class: "pair" }, f("price", "Price", "number"), f("mrp", "MRP", "number")),
+        f("url", "Store link", "url"),
+        h("div", { class: "pair" }, f("size", "My size"), f("note", "Note")),
+        h("div", { class: "row" },
+          h("button", { class: "btn small", type: "button", onclick: async (e) => { e.target.disabled = true; try { await putItem({ ...draft, url: isUrl(draft.url) ? String(draft.url).trim() : "" }); e.target.textContent = "Saved"; } catch (err) { e.target.textContent = "Couldn't save"; } setTimeout(() => { e.target.disabled = false; e.target.textContent = "Save changes"; }, 1500); } }, "Save changes"),
+          h("button", { class: "btn small ghost", type: "button", onclick: () => putItem({ ...it, bought: !it.bought }) }, it.bought ? "Move back to wishlist" : "Mark as bought"),
+          h("button", { class: "btn small danger", type: "button", onclick: async (e) => {
+            if (!delArmed) { delArmed = true; e.target.textContent = "Tap again to delete"; setTimeout(() => { delArmed = false; if (e.target.isConnected) e.target.textContent = "Delete"; }, 3000); return; }
+            delArmed = false; closeSheet(); await removeItem(it);
+          } }, "Delete"))));
+  }
+
+  // ---------- events ----------
+  $("#linkBtn").addEventListener("click", () => handleLink($("#linkIn").value));
+  $("#linkIn").addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); handleLink(e.target.value); } });
+  $("#fileIn").addEventListener("change", (e) => { const fs = [...(e.target.files || [])]; e.target.value = ""; handleImages(fs); });
+  $("#manualBtn").addEventListener("click", () => { startReview("manual"); addReviewItem({}); renderReview(); });
+  $("#storeSel").addEventListener("change", (e) => { state.store = e.target.value; render(); });
+  $("#sortSel").addEventListener("change", (e) => { state.sort = e.target.value; try { localStorage.setItem("wr.sort", state.sort); } catch {} render(); });
+  $("#shade").addEventListener("click", closeSheet);
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape" && state.openId) closeSheet(); });
+  document.addEventListener("paste", (e) => {
+    const cd = e.clipboardData; if (!cd) return;
+    const files = [...(cd.files || [])].filter((f) => /^image\//.test(f.type));
+    if (files.length) { e.preventDefault(); handleImages(files); return; }
+    const t = (cd.getData("text") || "").trim();
+    const inField = e.target && e.target.matches && e.target.matches("input,textarea");
+    if (isUrl(t) && (!inField || e.target.id === "linkIn")) { e.preventDefault(); handleLink(t); }
+  });
+  const drop = $("#drop");
+  ["dragenter", "dragover"].forEach((t) => drop.addEventListener(t, (e) => { e.preventDefault(); drop.classList.add("over"); }));
+  ["dragleave", "drop"].forEach((t) => drop.addEventListener(t, () => drop.classList.remove("over")));
+  drop.addEventListener("drop", (e) => {
+    e.preventDefault();
+    const files = [...((e.dataTransfer && e.dataTransfer.files) || [])];
+    if (files.length) handleImages(files);
+    else { const t = e.dataTransfer && (e.dataTransfer.getData("text/uri-list") || e.dataTransfer.getData("text")); if (isUrl(t)) handleLink(t.split("\n")[0]); }
+  });
+  function updateHint() {
+    $("#dropHint").textContent = !sample
+      ? "Choose a screenshot or paste a link, then fill in the details."
+      : canImages ? "Paste a screenshot (Ctrl+V), drop one here, or paste a product link. Claude reads the name, price and store."
+      : "Paste a product link. Claude reads the name and store.";
+  }
+
+  // ---------- boot ----------
+  render();
+  (async () => {
+    const C = window.claude;
+    const use = (n) => (C && C.use ? C.use(n).catch(() => null) : Promise.resolve(null));
+    const [db, s, a, m] = await Promise.all([use("db"), use("sample"), use("assets"), use("mcp")]);
+    sample = s; assets = a; mcp = m;
+    if (sample) { try { const lim = await sample.limits(); canImages = !!lim.images; } catch { canImages = false; } }
+    updateHint();
+    if (mcp) { try { const r = await mcp.listTools("host:claude_browser"); hasBrowser = (r.servers || []).some((x) => x.server === "host:claude_browser"); } catch { hasBrowser = false; } }
+    if (db) {
+      col = db.collection("items");
+      const timer = setTimeout(() => { state.note = "Your saved items are taking a while to load. They'll appear once the connection is back."; render(); }, 10000);
+      col.onSnapshot((snap) => {
+        state.mode = "db";
+        state.items = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+        if (!snap.metadata.fromCache) { clearTimeout(timer); state.note = ""; }
+        render();
+      }, (err) => {
+        clearTimeout(timer);
+        state.mode = "local"; loadLocal();
+        state.note = err && err.code === "revoked" ? "" : "Couldn't reach your saved items, so this device's copy is shown.";
+        render();
+      });
+    } else {
+      state.mode = "local"; loadLocal();
+      if (C) state.note = "Saving on this device only. Sign in to Claude to keep your rack in sync across phone and laptop.";
+      render();
+    }
+  })();
+})();
+</script>

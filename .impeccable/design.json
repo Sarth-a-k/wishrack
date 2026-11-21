@@ -1,0 +1,1018 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-21T12:07:54.495Z",
+  "title": "Design System: Wishrack",
+  "extensions": {
+    "colorMeta": {
+      "wool": {
+        "role": "neutral",
+        "displayName": "Night Wool",
+        "theme": "night",
+        "cssVar": "--wool",
+        "canonical": "#141a30",
+        "oklch": "oklch(22.4% 0.044 271)",
+        "tonalRamp": [
+          "oklch(15% 0.011 271)",
+          "oklch(26% 0.018 271)",
+          "oklch(37% 0.03 271)",
+          "oklch(48% 0.042 271)",
+          "oklch(60% 0.044 271)",
+          "oklch(72% 0.031 271)",
+          "oklch(84% 0.018 271)",
+          "oklch(95% 0.011 271)"
+        ]
+      },
+      "wool-2": {
+        "role": "neutral",
+        "displayName": "Raised Knit",
+        "theme": "night",
+        "cssVar": "--wool-2",
+        "canonical": "#1d2542",
+        "oklch": "oklch(27.3% 0.055 270.7)",
+        "tonalRamp": [
+          "oklch(15% 0.014 270.7)",
+          "oklch(26% 0.022 270.7)",
+          "oklch(37% 0.037 270.7)",
+          "oklch(48% 0.052 270.7)",
+          "oklch(60% 0.055 270.7)",
+          "oklch(72% 0.039 270.7)",
+          "oklch(84% 0.022 270.7)",
+          "oklch(95% 0.014 270.7)"
+        ]
+      },
+      "wool-3": {
+        "role": "neutral",
+        "displayName": "Rib Shadow",
+        "theme": "night",
+        "cssVar": "--wool-3",
+        "canonical": "#2a3459",
+        "oklch": "oklch(33.5% 0.067 271)",
+        "tonalRamp": [
+          "oklch(15% 0.017 271)",
+          "oklch(26% 0.027 271)",
+          "oklch(37% 0.045 271)",
+          "oklch(48% 0.063 271)",
+          "oklch(60% 0.067 271)",
+          "oklch(72% 0.047 271)",
+          "oklch(84% 0.027 271)",
+          "oklch(95% 0.017 271)"
+        ]
+      },
+      "wool-4": {
+        "role": "neutral",
+        "displayName": "Worn Rib",
+        "theme": "night",
+        "cssVar": "--wool-4",
+        "canonical": "#3a4673",
+        "oklch": "oklch(40.6% 0.077 271.3)",
+        "tonalRamp": [
+          "oklch(15% 0.019 271.3)",
+          "oklch(26% 0.031 271.3)",
+          "oklch(37% 0.052 271.3)",
+          "oklch(48% 0.073 271.3)",
+          "oklch(60% 0.077 271.3)",
+          "oklch(72% 0.054 271.3)",
+          "oklch(84% 0.031 271.3)",
+          "oklch(95% 0.019 271.3)"
+        ]
+      },
+      "field": {
+        "role": "neutral",
+        "displayName": "Deep Field",
+        "theme": "night",
+        "cssVar": "--field",
+        "canonical": "#10152a",
+        "oklch": "oklch(20.3% 0.043 272)",
+        "tonalRamp": [
+          "oklch(15% 0.011 272)",
+          "oklch(26% 0.017 272)",
+          "oklch(37% 0.029 272)",
+          "oklch(48% 0.041 272)",
+          "oklch(60% 0.043 272)",
+          "oklch(72% 0.03 272)",
+          "oklch(84% 0.017 272)",
+          "oklch(95% 0.011 272)"
+        ]
+      },
+      "yarn": {
+        "role": "neutral",
+        "displayName": "Oatmeal Yarn",
+        "theme": "night",
+        "cssVar": "--yarn",
+        "canonical": "#eee4cf",
+        "oklch": "oklch(92.1% 0.03 85.6)",
+        "tonalRamp": [
+          "oklch(15% 0.007 85.6)",
+          "oklch(26% 0.012 85.6)",
+          "oklch(37% 0.02 85.6)",
+          "oklch(48% 0.028 85.6)",
+          "oklch(60% 0.03 85.6)",
+          "oklch(72% 0.021 85.6)",
+          "oklch(84% 0.012 85.6)",
+          "oklch(95% 0.007 85.6)"
+        ]
+      },
+      "yarn-2": {
+        "role": "neutral",
+        "displayName": "Oatmeal Yarn, secondary",
+        "theme": "night",
+        "cssVar": "--yarn-2",
+        "canonical": "#b7b0a0",
+        "oklch": "oklch(75.9% 0.024 87.2)",
+        "tonalRamp": [
+          "oklch(15% 0.006 87.2)",
+          "oklch(26% 0.009 87.2)",
+          "oklch(37% 0.016 87.2)",
+          "oklch(48% 0.023 87.2)",
+          "oklch(60% 0.024 87.2)",
+          "oklch(72% 0.017 87.2)",
+          "oklch(84% 0.009 87.2)",
+          "oklch(95% 0.006 87.2)"
+        ]
+      },
+      "yarn-3": {
+        "role": "neutral",
+        "displayName": "Oatmeal Yarn, tertiary",
+        "theme": "night",
+        "cssVar": "--yarn-3",
+        "canonical": "#8f8a80",
+        "oklch": "oklch(63.5% 0.016 84.6)",
+        "tonalRamp": [
+          "oklch(15% 0.004 84.6)",
+          "oklch(26% 0.006 84.6)",
+          "oklch(37% 0.011 84.6)",
+          "oklch(48% 0.015 84.6)",
+          "oklch(60% 0.016 84.6)",
+          "oklch(72% 0.011 84.6)",
+          "oklch(84% 0.006 84.6)",
+          "oklch(95% 0.004 84.6)"
+        ]
+      },
+      "mustard": {
+        "role": "primary",
+        "displayName": "Mustard Button",
+        "theme": "night",
+        "cssVar": "--mustard",
+        "canonical": "#e6ad42",
+        "oklch": "oklch(78.2% 0.137 79.7)",
+        "tonalRamp": [
+          "oklch(15% 0.034 79.7)",
+          "oklch(26% 0.055 79.7)",
+          "oklch(37% 0.093 79.7)",
+          "oklch(48% 0.13 79.7)",
+          "oklch(60% 0.137 79.7)",
+          "oklch(72% 0.096 79.7)",
+          "oklch(84% 0.055 79.7)",
+          "oklch(95% 0.034 79.7)"
+        ]
+      },
+      "mustard-hi": {
+        "role": "primary",
+        "displayName": "Mustard Button, hover",
+        "theme": "night",
+        "cssVar": "--mustard-hi",
+        "canonical": "#f0bf5c",
+        "oklch": "oklch(83% 0.129 82.8)",
+        "tonalRamp": [
+          "oklch(15% 0.032 82.8)",
+          "oklch(26% 0.052 82.8)",
+          "oklch(37% 0.087 82.8)",
+          "oklch(48% 0.123 82.8)",
+          "oklch(60% 0.129 82.8)",
+          "oklch(72% 0.09 82.8)",
+          "oklch(84% 0.052 82.8)",
+          "oklch(95% 0.032 82.8)"
+        ]
+      },
+      "on-mustard": {
+        "role": "primary",
+        "displayName": "Ink on Mustard",
+        "theme": "night",
+        "cssVar": "--on-mustard",
+        "canonical": "#2a1b03",
+        "oklch": "oklch(23.6% 0.045 76.7)",
+        "tonalRamp": [
+          "oklch(15% 0.011 76.7)",
+          "oklch(26% 0.018 76.7)",
+          "oklch(37% 0.03 76.7)",
+          "oklch(48% 0.042 76.7)",
+          "oklch(60% 0.045 76.7)",
+          "oklch(72% 0.031 76.7)",
+          "oklch(84% 0.018 76.7)",
+          "oklch(95% 0.011 76.7)"
+        ]
+      },
+      "berry": {
+        "role": "secondary",
+        "displayName": "Berry Yarn",
+        "theme": "night",
+        "cssVar": "--berry",
+        "canonical": "#ef8fa0",
+        "oklch": "oklch(75.5% 0.117 8.8)",
+        "tonalRamp": [
+          "oklch(15% 0.029 8.8)",
+          "oklch(26% 0.047 8.8)",
+          "oklch(37% 0.079 8.8)",
+          "oklch(48% 0.112 8.8)",
+          "oklch(60% 0.117 8.8)",
+          "oklch(72% 0.082 8.8)",
+          "oklch(84% 0.047 8.8)",
+          "oklch(95% 0.029 8.8)"
+        ]
+      },
+      "moss": {
+        "role": "secondary",
+        "displayName": "Moss Yarn",
+        "theme": "night",
+        "cssVar": "--moss",
+        "canonical": "#a6d27f",
+        "oklch": "oklch(81.3% 0.12 131.4)",
+        "tonalRamp": [
+          "oklch(15% 0.03 131.4)",
+          "oklch(26% 0.048 131.4)",
+          "oklch(37% 0.081 131.4)",
+          "oklch(48% 0.114 131.4)",
+          "oklch(60% 0.12 131.4)",
+          "oklch(72% 0.084 131.4)",
+          "oklch(84% 0.048 131.4)",
+          "oklch(95% 0.03 131.4)"
+        ]
+      },
+      "horn": {
+        "role": "tertiary",
+        "displayName": "Horn",
+        "theme": "night",
+        "cssVar": "--horn",
+        "canonical": "#c39a6b",
+        "oklch": "oklch(71.3% 0.08 69.8)",
+        "tonalRamp": [
+          "oklch(15% 0.02 69.8)",
+          "oklch(26% 0.032 69.8)",
+          "oklch(37% 0.054 69.8)",
+          "oklch(48% 0.076 69.8)",
+          "oklch(60% 0.08 69.8)",
+          "oklch(72% 0.056 69.8)",
+          "oklch(84% 0.032 69.8)",
+          "oklch(95% 0.02 69.8)"
+        ]
+      },
+      "photo": {
+        "role": "neutral",
+        "displayName": "Photo Ground",
+        "theme": "night",
+        "cssVar": "--photo",
+        "canonical": "#262f4f",
+        "oklch": "oklch(31.3% 0.059 270.8)",
+        "tonalRamp": [
+          "oklch(15% 0.015 270.8)",
+          "oklch(26% 0.024 270.8)",
+          "oklch(37% 0.04 270.8)",
+          "oklch(48% 0.056 270.8)",
+          "oklch(60% 0.059 270.8)",
+          "oklch(72% 0.041 270.8)",
+          "oklch(84% 0.024 270.8)",
+          "oklch(95% 0.015 270.8)"
+        ]
+      },
+      "shade": {
+        "role": "neutral",
+        "displayName": "Shade",
+        "theme": "night",
+        "cssVar": "--shade",
+        "canonical": "rgba(6, 8, 18, .62)"
+      },
+      "day-wool": {
+        "role": "neutral",
+        "displayName": "Day Night Wool",
+        "theme": "day",
+        "cssVar": "--wool",
+        "canonical": "#e3e8f2",
+        "oklch": "oklch(93% 0.015 264.5)",
+        "tonalRamp": [
+          "oklch(15% 0.004 264.5)",
+          "oklch(26% 0.006 264.5)",
+          "oklch(37% 0.01 264.5)",
+          "oklch(48% 0.014 264.5)",
+          "oklch(60% 0.015 264.5)",
+          "oklch(72% 0.01 264.5)",
+          "oklch(84% 0.006 264.5)",
+          "oklch(95% 0.004 264.5)"
+        ]
+      },
+      "day-wool-2": {
+        "role": "neutral",
+        "displayName": "Day Raised Knit",
+        "theme": "day",
+        "cssVar": "--wool-2",
+        "canonical": "#d6ddeb",
+        "oklch": "oklch(89.6% 0.021 264.5)",
+        "tonalRamp": [
+          "oklch(15% 0.005 264.5)",
+          "oklch(26% 0.008 264.5)",
+          "oklch(37% 0.014 264.5)",
+          "oklch(48% 0.02 264.5)",
+          "oklch(60% 0.021 264.5)",
+          "oklch(72% 0.014 264.5)",
+          "oklch(84% 0.008 264.5)",
+          "oklch(95% 0.005 264.5)"
+        ]
+      },
+      "day-wool-3": {
+        "role": "neutral",
+        "displayName": "Day Rib Shadow",
+        "theme": "day",
+        "cssVar": "--wool-3",
+        "canonical": "#bcc6da",
+        "oklch": "oklch(82.5% 0.03 264.4)",
+        "tonalRamp": [
+          "oklch(15% 0.008 264.4)",
+          "oklch(26% 0.012 264.4)",
+          "oklch(37% 0.02 264.4)",
+          "oklch(48% 0.029 264.4)",
+          "oklch(60% 0.03 264.4)",
+          "oklch(72% 0.021 264.4)",
+          "oklch(84% 0.012 264.4)",
+          "oklch(95% 0.008 264.4)"
+        ]
+      },
+      "day-wool-4": {
+        "role": "neutral",
+        "displayName": "Day Worn Rib",
+        "theme": "day",
+        "cssVar": "--wool-4",
+        "canonical": "#9aa7c2",
+        "oklch": "oklch(72.7% 0.042 265)",
+        "tonalRamp": [
+          "oklch(15% 0.01 265)",
+          "oklch(26% 0.017 265)",
+          "oklch(37% 0.028 265)",
+          "oklch(48% 0.04 265)",
+          "oklch(60% 0.042 265)",
+          "oklch(72% 0.029 265)",
+          "oklch(84% 0.017 265)",
+          "oklch(95% 0.01 265)"
+        ]
+      },
+      "day-field": {
+        "role": "neutral",
+        "displayName": "Day Deep Field",
+        "theme": "day",
+        "cssVar": "--field",
+        "canonical": "#f6f8fc",
+        "oklch": "oklch(97.9% 0.006 264.5)",
+        "tonalRamp": [
+          "oklch(15% 0.001 264.5)",
+          "oklch(26% 0.002 264.5)",
+          "oklch(37% 0.004 264.5)",
+          "oklch(48% 0.005 264.5)",
+          "oklch(60% 0.006 264.5)",
+          "oklch(72% 0.004 264.5)",
+          "oklch(84% 0.002 264.5)",
+          "oklch(95% 0.001 264.5)"
+        ]
+      },
+      "day-yarn": {
+        "role": "neutral",
+        "displayName": "Day Oatmeal Yarn",
+        "theme": "day",
+        "cssVar": "--yarn",
+        "canonical": "#1b2340",
+        "oklch": "oklch(26.5% 0.055 270.6)",
+        "tonalRamp": [
+          "oklch(15% 0.014 270.6)",
+          "oklch(26% 0.022 270.6)",
+          "oklch(37% 0.037 270.6)",
+          "oklch(48% 0.053 270.6)",
+          "oklch(60% 0.055 270.6)",
+          "oklch(72% 0.039 270.6)",
+          "oklch(84% 0.022 270.6)",
+          "oklch(95% 0.014 270.6)"
+        ]
+      },
+      "day-yarn-2": {
+        "role": "neutral",
+        "displayName": "Day Oatmeal Yarn, secondary",
+        "theme": "day",
+        "cssVar": "--yarn-2",
+        "canonical": "#4f566c",
+        "oklch": "oklch(45.6% 0.037 271.1)",
+        "tonalRamp": [
+          "oklch(15% 0.009 271.1)",
+          "oklch(26% 0.015 271.1)",
+          "oklch(37% 0.025 271.1)",
+          "oklch(48% 0.035 271.1)",
+          "oklch(60% 0.037 271.1)",
+          "oklch(72% 0.026 271.1)",
+          "oklch(84% 0.015 271.1)",
+          "oklch(95% 0.009 271.1)"
+        ]
+      },
+      "day-yarn-3": {
+        "role": "neutral",
+        "displayName": "Day Oatmeal Yarn, tertiary",
+        "theme": "day",
+        "cssVar": "--yarn-3",
+        "canonical": "#6e7182",
+        "oklch": "oklch(55.2% 0.027 277.6)",
+        "tonalRamp": [
+          "oklch(15% 0.007 277.6)",
+          "oklch(26% 0.011 277.6)",
+          "oklch(37% 0.018 277.6)",
+          "oklch(48% 0.025 277.6)",
+          "oklch(60% 0.027 277.6)",
+          "oklch(72% 0.019 277.6)",
+          "oklch(84% 0.011 277.6)",
+          "oklch(95% 0.007 277.6)"
+        ]
+      },
+      "day-mustard": {
+        "role": "primary",
+        "displayName": "Day Mustard Button",
+        "theme": "day",
+        "cssVar": "--mustard",
+        "canonical": "#d99a26",
+        "oklch": "oklch(73% 0.142 76.9)",
+        "tonalRamp": [
+          "oklch(15% 0.036 76.9)",
+          "oklch(26% 0.057 76.9)",
+          "oklch(37% 0.096 76.9)",
+          "oklch(48% 0.135 76.9)",
+          "oklch(60% 0.142 76.9)",
+          "oklch(72% 0.099 76.9)",
+          "oklch(84% 0.057 76.9)",
+          "oklch(95% 0.036 76.9)"
+        ]
+      },
+      "day-mustard-hi": {
+        "role": "primary",
+        "displayName": "Day Mustard Button, hover",
+        "theme": "day",
+        "cssVar": "--mustard-hi",
+        "canonical": "#e5a93a",
+        "oklch": "oklch(77.3% 0.141 78.7)",
+        "tonalRamp": [
+          "oklch(15% 0.035 78.7)",
+          "oklch(26% 0.056 78.7)",
+          "oklch(37% 0.095 78.7)",
+          "oklch(48% 0.134 78.7)",
+          "oklch(60% 0.141 78.7)",
+          "oklch(72% 0.098 78.7)",
+          "oklch(84% 0.056 78.7)",
+          "oklch(95% 0.035 78.7)"
+        ]
+      },
+      "day-on-mustard": {
+        "role": "primary",
+        "displayName": "Day Ink on Mustard",
+        "theme": "day",
+        "cssVar": "--on-mustard",
+        "canonical": "#241703",
+        "oklch": "oklch(21.6% 0.04 76.9)",
+        "tonalRamp": [
+          "oklch(15% 0.01 76.9)",
+          "oklch(26% 0.016 76.9)",
+          "oklch(37% 0.027 76.9)",
+          "oklch(48% 0.038 76.9)",
+          "oklch(60% 0.04 76.9)",
+          "oklch(72% 0.028 76.9)",
+          "oklch(84% 0.016 76.9)",
+          "oklch(95% 0.01 76.9)"
+        ]
+      },
+      "day-berry": {
+        "role": "secondary",
+        "displayName": "Day Berry Yarn",
+        "theme": "day",
+        "cssVar": "--berry",
+        "canonical": "#a8324d",
+        "oklch": "oklch(50.1% 0.154 11.2)",
+        "tonalRamp": [
+          "oklch(15% 0.038 11.2)",
+          "oklch(26% 0.062 11.2)",
+          "oklch(37% 0.104 11.2)",
+          "oklch(48% 0.146 11.2)",
+          "oklch(60% 0.154 11.2)",
+          "oklch(72% 0.108 11.2)",
+          "oklch(84% 0.062 11.2)",
+          "oklch(95% 0.038 11.2)"
+        ]
+      },
+      "day-moss": {
+        "role": "secondary",
+        "displayName": "Day Moss Yarn",
+        "theme": "day",
+        "cssVar": "--moss",
+        "canonical": "#2f6420",
+        "oklch": "oklch(45.1% 0.115 139.4)",
+        "tonalRamp": [
+          "oklch(15% 0.029 139.4)",
+          "oklch(26% 0.046 139.4)",
+          "oklch(37% 0.077 139.4)",
+          "oklch(48% 0.109 139.4)",
+          "oklch(60% 0.115 139.4)",
+          "oklch(72% 0.08 139.4)",
+          "oklch(84% 0.046 139.4)",
+          "oklch(95% 0.029 139.4)"
+        ]
+      },
+      "day-horn": {
+        "role": "tertiary",
+        "displayName": "Day Horn",
+        "theme": "day",
+        "cssVar": "--horn",
+        "canonical": "#a77a48",
+        "oklch": "oklch(61.4% 0.087 67.9)",
+        "tonalRamp": [
+          "oklch(15% 0.022 67.9)",
+          "oklch(26% 0.035 67.9)",
+          "oklch(37% 0.059 67.9)",
+          "oklch(48% 0.083 67.9)",
+          "oklch(60% 0.087 67.9)",
+          "oklch(72% 0.061 67.9)",
+          "oklch(84% 0.035 67.9)",
+          "oklch(95% 0.022 67.9)"
+        ]
+      },
+      "day-photo": {
+        "role": "neutral",
+        "displayName": "Day Photo Ground",
+        "theme": "day",
+        "cssVar": "--photo",
+        "canonical": "#cbd3e3",
+        "oklch": "oklch(86.6% 0.024 264.4)",
+        "tonalRamp": [
+          "oklch(15% 0.006 264.4)",
+          "oklch(26% 0.01 264.4)",
+          "oklch(37% 0.016 264.4)",
+          "oklch(48% 0.023 264.4)",
+          "oklch(60% 0.024 264.4)",
+          "oklch(72% 0.017 264.4)",
+          "oklch(84% 0.01 264.4)",
+          "oklch(95% 0.006 264.4)"
+        ]
+      },
+      "day-shade": {
+        "role": "neutral",
+        "displayName": "Day Shade",
+        "theme": "day",
+        "cssVar": "--shade",
+        "canonical": "rgba(27, 35, 64, .42)"
+      }
+    },
+    "themes": {
+      "night": {
+        "selector": ":root",
+        "default": true,
+        "colorScheme": "dark",
+        "note": "Undecorated color keys."
+      },
+      "day": {
+        "selector": ":root[data-theme=\"light\"], and :root:not([data-theme]) under @media (prefers-color-scheme: light)",
+        "colorScheme": "light",
+        "note": "day- color keys replace the same-named Night variable one for one. Theme stored in localStorage wr.theme (system | dark | light)."
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "Passcode screen headline only; balanced wrap."
+      },
+      "wordmark": {
+        "displayName": "Wordmark",
+        "purpose": "Wishrack in the bar beside the horn button."
+      },
+      "wordmark-gate": {
+        "displayName": "Wordmark, gate",
+        "purpose": "Logo lockup pinned top-left on the passcode screen."
+      },
+      "placeholder-mark": {
+        "displayName": "Placeholder mark",
+        "purpose": "Store name in a photo-less frame (55% opacity, 70% when tinted)."
+      },
+      "placeholder-mark-small": {
+        "displayName": "Placeholder mark, small",
+        "purpose": "Store name in the sheet hero's smaller frame."
+      },
+      "empty-headline": {
+        "displayName": "Empty headline",
+        "purpose": "Empty-rack heading."
+      },
+      "sheet-label": {
+        "displayName": "Sheet label",
+        "purpose": "Settings sheet heading in yarn-2."
+      },
+      "passcode": {
+        "displayName": "Passcode",
+        "purpose": "Passcode field only; 0.12em tracking."
+      },
+      "input": {
+        "displayName": "Input",
+        "purpose": "Every other field; 16px so phones do not zoom."
+      },
+      "card-title": {
+        "displayName": "Card title",
+        "purpose": "Two-line product name on rack cards."
+      },
+      "button-small": {
+        "displayName": "Button, small",
+        "purpose": "Small buttons and chips."
+      },
+      "hint": {
+        "displayName": "Hint",
+        "purpose": "Sheet hints, captions, link-ish text."
+      },
+      "flag": {
+        "displayName": "Flag",
+        "purpose": "Drop / bought pills on grid photos."
+      },
+      "flag-small": {
+        "displayName": "Flag, small",
+        "purpose": "The one size below 12px: flags on the sheet hero photo only."
+      },
+      "price-big": {
+        "displayName": "Price, big",
+        "purpose": "Price in the item sheet hero."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Save strip and review panel headings."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Product name in the sheet hero; the item sheet's heading."
+      },
+      "price": {
+        "displayName": "Price",
+        "purpose": "Every grid price and the bar total; tabular figures."
+      },
+      "section": {
+        "displayName": "Section",
+        "purpose": "Sheet section headings."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Base text, 15px/1.45."
+      },
+      "button": {
+        "displayName": "Button",
+        "purpose": "Button labels."
+      },
+      "support": {
+        "displayName": "Support",
+        "purpose": "Sub copy, status lines, counts, selects; yarn-2, max 62ch."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Field labels in yarn-2."
+      },
+      "meta": {
+        "displayName": "Meta",
+        "purpose": "Store / colour / size lines, axis dates, flags (700)."
+      }
+    },
+    "fonts": [
+      {
+        "family": "Bricolage Grotesque",
+        "source": "self-hosted",
+        "weights": "200 800 (variable)",
+        "files": [
+          "/fonts/bricolage-grotesque-latin.woff2",
+          "/fonts/bricolage-grotesque-latin-ext.woff2"
+        ],
+        "display": "swap",
+        "preload": "latin",
+        "cachedBy": "service worker (latin)"
+      },
+      {
+        "family": "Figtree",
+        "source": "self-hosted",
+        "weights": "300 900 (variable)",
+        "files": [
+          "/fonts/figtree-latin.woff2",
+          "/fonts/figtree-latin-ext.woff2"
+        ],
+        "display": "swap",
+        "preload": "latin",
+        "cachedBy": "service worker (latin)"
+      }
+    ],
+    "placeholderTints": {
+      "source": "app.js TINTS, matched against the item's saved colour word",
+      "mix": "color-mix(in srgb, var(--tint) 42%, var(--photo))",
+      "note": "Data colours, not UI tokens.",
+      "values": {
+        "olive": "#6f7347",
+        "taupe": "#8c7a63",
+        "black": "#1b1c22",
+        "grey": "#5c616d",
+        "navy": "#26345e",
+        "blue": "#3f5f97",
+        "green": "#4f6e4c",
+        "brown": "#6a4a35",
+        "red": "#8a3340",
+        "pink": "#b06a7c",
+        "white": "#d8d2c4",
+        "yellow": "#b58d2e",
+        "orange": "#a8552e",
+        "purple": "#6b5a8c"
+      }
+    },
+    "radiusExceptions": [
+      {
+        "token": "tick",
+        "value": "2px",
+        "usedOn": "progress bar, sheet grab handle, chart legend keys"
+      },
+      {
+        "token": "cut",
+        "value": "4px",
+        "usedOn": "crop box"
+      },
+      {
+        "token": "line",
+        "value": "6px",
+        "usedOn": "skeleton text bars, rack card text block"
+      },
+      {
+        "token": "none",
+        "value": "0",
+        "usedOn": "peerie band (edge to edge inside the clipped save strip)"
+      }
+    ],
+    "selectionAndCaret": {
+      "selection": "background var(--mustard), color var(--on-mustard)",
+      "caret": "var(--mustard)",
+      "note": "Documented exception to the Mustard Button Rule."
+    },
+    "shadows": [
+      {
+        "name": "lift",
+        "cssVar": "--lift",
+        "value": "0 18px 40px -18px rgba(0, 0, 0, .7), 0 2px 6px rgba(0, 0, 0, .25)",
+        "dayValue": "0 18px 40px -20px rgba(27, 35, 64, .45), 0 2px 6px rgba(27, 35, 64, .12)",
+        "purpose": "The open sheet / drawer."
+      },
+      {
+        "name": "cuff-fall",
+        "value": "0 6px 10px -6px rgba(0, 0, 0, .35)",
+        "purpose": "Under the bar's ribbed edge."
+      },
+      {
+        "name": "button-glow",
+        "value": "0 6px 14px -8px color-mix(in srgb, var(--mustard) 60%, transparent)",
+        "purpose": "Faint mustard warmth under primary buttons."
+      },
+      {
+        "name": "flag-float",
+        "value": "0 4px 10px -4px rgba(0, 0, 0, .5)",
+        "purpose": "Drop / bought pill on a photo."
+      },
+      {
+        "name": "crop-mask",
+        "value": "0 0 0 9999px color-mix(in srgb, var(--wool) 70%, transparent)",
+        "purpose": "Darkens the screenshot outside the crop box."
+      }
+    ],
+    "textures": [
+      {
+        "name": "ribbed-cuff",
+        "value": "repeating-linear-gradient(90deg, var(--wool-2) 0 4px, var(--wool-3) 4px 6px)",
+        "height": "7px",
+        "purpose": "Edge under the bar and across the top of the phone sheet."
+      },
+      {
+        "name": "horn-button",
+        "value": "16px circle of --horn with four 1.3px --wool holes at 35%/65%, inset 2px rim of horn mixed 70% with black",
+        "purpose": "Logo mark beside the wordmark."
+      },
+      {
+        "name": "stitch",
+        "value": "M5 9.4C2.6 8 1 5.2 1.3 1.2 3.4 1.8 5 4.6 5 9.4ZM5 9.4C7.4 8 9 5.2 8.7 1.2 6.6 1.8 5 4.6 5 9.4Z",
+        "grid": "10 x 10 units",
+        "purpose": "The one knitted stitch for the price chart, peerie band and gate swatch."
+      },
+      {
+        "name": "peerie-band",
+        "value": "knitSvg(300 cols, 3 rows), motif a...a... / .a.a.a.a / ..b...b.; a = yarn 55% in wool-2, b = horn, empty = wool-3, ground wool-2",
+        "height": "16px",
+        "purpose": "Across the top of the save strip; not animated."
+      },
+      {
+        "name": "gate-swatch",
+        "value": "knitSvg(26 cols, 7 rows); a = yarn, b = horn, empty = wool-3, ground wool-2",
+        "maxWidth": "360px",
+        "purpose": "Passcode screen ornament above the headline."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease-settle",
+        "value": "cubic-bezier(.16, 1, .3, 1)",
+        "purpose": "Sheet slide-in / rise (.38s) and stitch columns knitting in (.5s, 45ms stagger per column)."
+      },
+      {
+        "name": "ease-soft",
+        "value": "cubic-bezier(.2, .7, .2, 1)",
+        "purpose": "Photo hover zoom to 1.03 (.5s) and progress bar width (.4s)."
+      },
+      {
+        "name": "state",
+        "value": ".15s",
+        "purpose": "Background and border colour changes on buttons and the save strip."
+      },
+      {
+        "name": "press",
+        "value": "translateY(1px) over .1s",
+        "purpose": "Button press."
+      },
+      {
+        "name": "fade",
+        "value": ".25s ease-out",
+        "purpose": "Shade behind an open sheet."
+      },
+      {
+        "name": "breathe",
+        "value": "1.6s ease-in-out infinite alternate, to opacity .55",
+        "purpose": "Skeleton photo frames while loading."
+      },
+      {
+        "name": "spin",
+        "value": ".8s linear infinite",
+        "purpose": "15px busy spinner."
+      },
+      {
+        "name": "reduced-motion",
+        "value": "all animation and transition durations .01ms",
+        "purpose": "prefers-reduced-motion: reduce."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "laptop",
+        "value": "640px",
+        "purpose": "Grid becomes auto-fill minmax(190px, 1fr); buttons natural width; sheet becomes a right drawer (bottom sheet at 640px and below)."
+      },
+      {
+        "name": "review-wide",
+        "value": "720px",
+        "purpose": "Review item: crop editor beside fields."
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Mustard fill for the one next action (Save, Open my rack, Go to store). Mustard otherwise appears only on other controls, the text selection and the caret.",
+      "html": "<button class=\"ds-btn-primary\">Go to H&amp;M <svg viewBox=\"0 0 24 24\" width=\"16\" height=\"16\" aria-hidden=\"true\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M14 4h6v6M20 4l-9 9\"/><path d=\"M18 14v4.5A1.5 1.5 0 0 1 16.5 20h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6H10\"/></svg></button>",
+      "css": ".ds-btn-primary{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 16px;border-radius:var(--r-sm, 11px);border:1.5px solid var(--wool-3, #2a3459);background:transparent;color:var(--yarn, #eee4cf);font:600 14px var(--body, Figtree, system-ui, sans-serif);cursor:pointer;white-space:nowrap;transition:background-color .15s,border-color .15s,transform .1s;background:var(--mustard, #e6ad42);border-color:var(--mustard, #e6ad42);color:var(--on-mustard, #2a1b03);box-shadow:0 6px 14px -8px color-mix(in srgb, var(--mustard, #e6ad42) 60%, transparent);} .ds-btn-primary:hover{background:var(--mustard-hi, #f0bf5c);border-color:var(--mustard-hi, #f0bf5c);} .ds-btn-primary:active{transform:translateY(1px);} .ds-btn-primary:focus-visible{outline:2px solid var(--yarn, #eee4cf);outline-offset:2px;}"
+    },
+    {
+      "name": "Outline Button",
+      "kind": "button",
+      "refersTo": "button-outline",
+      "description": "The default wool button with a rib-shadow border; used for secondary actions (marked 'ghost' in markup).",
+      "html": "<button class=\"ds-btn\"><svg viewBox=\"0 0 24 24\" width=\"18\" height=\"18\" aria-hidden=\"true\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><rect x=\"3.5\" y=\"4.5\" width=\"17\" height=\"15\" rx=\"3\"/><circle cx=\"9\" cy=\"10\" r=\"1.8\"/><path d=\"m4.5 17.5 5-5 4 4 2.5-2.5 3.5 3.5\"/></svg>Choose screenshots</button>",
+      "css": ".ds-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 16px;border-radius:var(--r-sm, 11px);border:1.5px solid var(--wool-3, #2a3459);background:transparent;color:var(--yarn, #eee4cf);font:600 14px var(--body, Figtree, system-ui, sans-serif);cursor:pointer;white-space:nowrap;transition:background-color .15s,border-color .15s,transform .1s;} .ds-btn:hover{border-color:var(--wool-4, #3a4673);background:color-mix(in srgb, var(--wool-3, #2a3459) 35%, transparent);} .ds-btn:active{transform:translateY(1px);} .ds-btn:focus-visible{outline:2px solid var(--yarn, #eee4cf);outline-offset:2px;}"
+    },
+    {
+      "name": "Danger Button",
+      "kind": "button",
+      "refersTo": "button-danger",
+      "description": "Small berry outline for Delete and Lock; Delete arms on first tap and acts on the second.",
+      "html": "<button class=\"ds-btn-danger\"><svg viewBox=\"0 0 24 24\" width=\"16\" height=\"16\" aria-hidden=\"true\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M4.5 7h15M10 11v6M14 11v6\"/><path d=\"M6 7l1 12.5A1.5 1.5 0 0 0 8.5 21h7a1.5 1.5 0 0 0 1.5-1.5L18 7\"/><path d=\"M9 7V4.5h6V7\"/></svg>Delete</button>",
+      "css": ".ds-btn-danger{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 16px;border-radius:var(--r-sm, 11px);border:1.5px solid var(--wool-3, #2a3459);background:transparent;color:var(--yarn, #eee4cf);font:600 14px var(--body, Figtree, system-ui, sans-serif);cursor:pointer;white-space:nowrap;transition:background-color .15s,border-color .15s,transform .1s;min-height:44px;padding:0 13px;font-size:13px;color:var(--berry, #ef8fa0);border-color:color-mix(in srgb, var(--berry, #ef8fa0) 45%, transparent);} .ds-btn-danger:hover{border-color:var(--berry, #ef8fa0);background:color-mix(in srgb, var(--berry, #ef8fa0) 10%, transparent);} .ds-btn-danger:focus-visible{outline:2px solid var(--yarn, #eee4cf);outline-offset:2px;}"
+    },
+    {
+      "name": "Paste Link Field",
+      "kind": "input",
+      "refersTo": "input-field",
+      "description": "Deep-field input one ply below the knit, paired with the mustard Save.",
+      "html": "<form class=\"ds-link-row\" onsubmit=\"return false\"><input class=\"ds-input\" type=\"url\" placeholder=\"Paste a product link\"><button class=\"ds-btn-primary\">Save</button></form>",
+      "css": ".ds-link-row{display:flex;gap:8px;} .ds-input{flex:1 1 auto;min-width:0;height:48px;border:1.5px solid var(--wool-3, #2a3459);border-radius:var(--r-sm, 11px);padding:0 14px;background:var(--field, #10152a);color:var(--yarn, #eee4cf);font:16px var(--body, Figtree, system-ui, sans-serif);caret-color:var(--mustard, #e6ad42);} .ds-input::placeholder{color:var(--yarn-3, #8f8a80);} .ds-input:focus{outline:none;border-color:var(--yarn-2, #b7b0a0);} .ds-link-row .ds-btn-primary{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 16px;border-radius:var(--r-sm, 11px);border:1.5px solid var(--wool-3, #2a3459);background:transparent;color:var(--yarn, #eee4cf);font:600 14px var(--body, Figtree, system-ui, sans-serif);cursor:pointer;white-space:nowrap;transition:background-color .15s,border-color .15s,transform .1s;min-height:48px;padding:0 20px;background:var(--mustard, #e6ad42);border-color:var(--mustard, #e6ad42);color:var(--on-mustard, #2a1b03);} .ds-link-row .ds-btn-primary:hover{background:var(--mustard-hi, #f0bf5c);border-color:var(--mustard-hi, #f0bf5c);}"
+    },
+    {
+      "name": "Bar",
+      "kind": "nav",
+      "refersTo": "panel",
+      "description": "Sticky raised-knit bar: horn-button wordmark, tally, settings; finished with the ribbed cuff.",
+      "html": "<header class=\"ds-bar\"><p class=\"ds-logo\"><span class=\"ds-horn\"></span>Wishrack</p><div class=\"ds-bar-right\"><p class=\"ds-tally\"><span>12 to buy</span><b>Rs. 18,450</b></p><button class=\"ds-icon-btn\" aria-label=\"Settings\"><svg viewBox=\"0 0 24 24\" width=\"22\" height=\"22\" aria-hidden=\"true\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><circle cx=\"12\" cy=\"12\" r=\"3.2\"/><path d=\"M19.4 13.5a7.6 7.6 0 0 0 0-3l2-1.5-2-3.4-2.3 1a7.4 7.4 0 0 0-2.6-1.5L14 2.6h-4l-.5 2.5A7.4 7.4 0 0 0 6.9 6.6l-2.3-1-2 3.4 2 1.5a7.6 7.6 0 0 0 0 3l-2 1.5 2 3.4 2.3-1a7.4 7.4 0 0 0 2.6 1.5l.5 2.5h4l.5-2.5a7.4 7.4 0 0 0 2.6-1.5l2.3 1 2-3.4-2-1.5Z\"/></svg></button></div></header>",
+      "css": ".ds-bar{position:relative;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 16px;background:var(--wool-2, #1d2542);color:var(--yarn, #eee4cf);margin-bottom:12px;} .ds-bar::after{content:\"\";position:absolute;left:0;right:0;top:100%;height:7px;background:repeating-linear-gradient(90deg, var(--wool-2, #1d2542) 0 4px, var(--wool-3, #2a3459) 4px 6px);box-shadow:0 6px 10px -6px rgba(0,0,0,.35);} .ds-logo{margin:0;display:flex;align-items:center;gap:9px;font:800 24px/1 var(--display, 'Bricolage Grotesque', Figtree, sans-serif);letter-spacing:-.02em;} .ds-horn{width:16px;height:16px;border-radius:50%;background:radial-gradient(circle at 35% 35%, var(--wool, #141a30) 0 1.3px, transparent 1.6px),radial-gradient(circle at 65% 35%, var(--wool, #141a30) 0 1.3px, transparent 1.6px),radial-gradient(circle at 35% 65%, var(--wool, #141a30) 0 1.3px, transparent 1.6px),radial-gradient(circle at 65% 65%, var(--wool, #141a30) 0 1.3px, transparent 1.6px),var(--horn, #c39a6b);box-shadow:inset 0 0 0 2px color-mix(in srgb, var(--horn, #c39a6b) 70%, #000);} .ds-bar-right{display:flex;align-items:center;gap:4px;} .ds-tally{margin:0;display:grid;text-align:right;line-height:1.15;font-variant-numeric:tabular-nums;} .ds-tally span{font:12px var(--body, Figtree, sans-serif);color:var(--yarn-2, #b7b0a0);} .ds-tally b{font:700 17px var(--display, 'Bricolage Grotesque', sans-serif);} .ds-icon-btn{width:44px;height:44px;display:grid;place-items:center;border:0;background:none;border-radius:50%;color:inherit;cursor:pointer;} .ds-icon-btn:hover{background:var(--wool-3, #2a3459);} .ds-icon-btn:focus-visible{outline:2px solid var(--yarn, #eee4cf);outline-offset:2px;}"
+    },
+    {
+      "name": "Store Chip",
+      "kind": "chip",
+      "refersTo": "chip",
+      "description": "Pill outline linking to another store's search for the same product.",
+      "html": "<a class=\"ds-chip\" href=\"#\"><svg viewBox=\"0 0 24 24\" width=\"14\" height=\"14\" aria-hidden=\"true\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><circle cx=\"11\" cy=\"11\" r=\"6.5\"/><path d=\"m20 20-4.4-4.4\"/></svg>Myntra</a>",
+      "css": ".ds-chip{display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:0 14px 0 11px;border:1.5px solid var(--wool-3, #2a3459);border-radius:999px;color:var(--yarn, #eee4cf);font:600 13px var(--body, Figtree, sans-serif);text-decoration:none;} .ds-chip:hover{border-color:var(--yarn-2, #b7b0a0);} .ds-chip:focus-visible{outline:2px solid var(--yarn, #eee4cf);outline-offset:2px;}"
+    },
+    {
+      "name": "Rack Card",
+      "kind": "card",
+      "refersTo": "photo-frame",
+      "description": "Photo-first card: identical 3:4 frame (links to store; tinted from the saved colour when there is no photo), price-fell flag, meta, title and a Bricolage price with struck MRP.",
+      "html": "<article class=\"ds-card\"><a class=\"ds-photo\" href=\"#\"><span class=\"ds-ph\"><b>Bonkers</b><span>No photo yet</span></span><span class=\"ds-flag\"><svg viewBox=\"0 0 24 24\" width=\"14\" height=\"14\" aria-hidden=\"true\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M12 5v14M6 13l6 6 6-6\"/></svg>Rs. 300 drop</span></a><button class=\"ds-info\"><span class=\"ds-meta\">Bonkers Corner · Black · M</span><span class=\"ds-title\">Oversized Ducati crewneck sweatshirt</span><span class=\"ds-price\">Rs. 1,199 <span class=\"ds-mrp\"><s>Rs. 1,999</s></span> <span class=\"ds-pct-off\">40% off</span></span></button></article>",
+      "css": ".ds-card{display:grid;gap:2px;max-width:200px;color:var(--yarn, #eee4cf);} .ds-photo{display:block;position:relative;aspect-ratio:3/4;background:color-mix(in srgb, #3f5f97 42%, var(--photo, #262f4f));border-radius:var(--r-md, 14px);overflow:hidden;} .ds-photo:focus-visible{outline:2px solid var(--yarn, #eee4cf);outline-offset:2px;} .ds-ph{position:absolute;inset:0;display:grid;align-content:end;gap:2px;padding:12px;color:var(--yarn-2, #b7b0a0);font:12px var(--body, Figtree, sans-serif);} .ds-ph b{font:800 26px/1 var(--display, 'Bricolage Grotesque', sans-serif);color:var(--yarn, #eee4cf);opacity:.7;letter-spacing:-.02em;} .ds-flag{position:absolute;left:8px;top:8px;display:inline-flex;align-items:center;gap:4px;background:var(--wool, #141a30);color:var(--moss, #a6d27f);border-radius:999px;padding:4px 9px 4px 7px;font:700 12px var(--body, Figtree, sans-serif);font-variant-numeric:tabular-nums;box-shadow:0 4px 10px -4px rgba(0,0,0,.5);} .ds-info{display:grid;gap:1px;padding:9px 2px 4px;text-align:left;background:none;border:0;color:inherit;cursor:pointer;border-radius:6px;} .ds-info:focus-visible{outline:2px solid var(--yarn, #eee4cf);outline-offset:2px;} .ds-meta{font:12px var(--body, Figtree, sans-serif);color:var(--yarn-2, #b7b0a0);} .ds-title{font:14px/1.3 var(--body, Figtree, sans-serif);} .ds-price{display:flex;flex-wrap:wrap;gap:0 7px;align-items:baseline;margin-top:3px;font:700 17px/1.3 var(--display, 'Bricolage Grotesque', sans-serif);font-variant-numeric:tabular-nums;} .ds-mrp{font:400 12.5px var(--body, Figtree, sans-serif);color:var(--yarn-2, #b7b0a0);} .ds-mrp s{text-decoration-thickness:1.5px;} .ds-pct-off{font:700 12.5px var(--body, Figtree, sans-serif);color:var(--berry, #ef8fa0);}"
+    },
+    {
+      "name": "Theme Switch",
+      "kind": "custom",
+      "refersTo": "segmented",
+      "description": "Segmented pill on a deep field: Match phone / Night / Day.",
+      "html": "<div class=\"ds-seg\" role=\"radiogroup\" aria-label=\"Theme\"><label><input type=\"radio\" name=\"ds-theme\"><span>Match phone</span></label><label><input type=\"radio\" name=\"ds-theme\" checked><span>Night</span></label><label><input type=\"radio\" name=\"ds-theme\"><span>Day</span></label></div>",
+      "css": ".ds-seg{display:inline-grid;grid-auto-flow:column;gap:2px;padding:4px;background:var(--field, #10152a);border-radius:999px;} .ds-seg label{position:relative;} .ds-seg input{position:absolute;inset:0;opacity:0;margin:0;cursor:pointer;} .ds-seg span{display:block;padding:9px 16px;border-radius:999px;font:600 13.5px var(--body, Figtree, sans-serif);color:var(--yarn-2, #b7b0a0);} .ds-seg label:hover span{color:var(--yarn, #eee4cf);} .ds-seg input:checked + span{background:var(--wool-3, #2a3459);color:var(--yarn, #eee4cf);} .ds-seg input:focus-visible + span{outline:2px solid var(--yarn, #eee4cf);}"
+    },
+    {
+      "name": "Knitted Price Chart",
+      "kind": "custom",
+      "refersTo": "knit-chart",
+      "description": "Signature: price history as Fair Isle colourwork, one six-stitch column per daily check (about 34px wide); moss = fell, berry = rose, yarn-2 = unchanged.",
+      "html": "<figure class=\"ds-knit\"><svg class=\"ds-knit-svg\" viewBox=\"0 0 60 60\" role=\"img\" aria-label=\"Price history\"><g><path class=\"st\" d=\"M5 9.4C2.6 8 1 5.2 1.3 1.2 3.4 1.8 5 4.6 5 9.4ZM5 9.4C7.4 8 9 5.2 8.7 1.2 6.6 1.8 5 4.6 5 9.4Z\" transform=\"translate(0 0)\"/><path class=\"st\" d=\"M5 9.4C2.6 8 1 5.2 1.3 1.2 3.4 1.8 5 4.6 5 9.4ZM5 9.4C7.4 8 9 5.2 8.7 1.2 6.6 1.8 5 4.6 5 9.4Z\" transform=\"translate(0 10)\"/><path class=\"st\" d=\"M5 9.4C2.6 8 1 5.2 1.3 1.2 3.4 1.8 5 4.6 5 9.4ZM5 9.4C7.4 8 9 5.2 8.7 1.2 6.6 1.8 5 4.6 5 9.4Z\" transform=\"translate(0 20)\"/><path class=\"st same\" d=\"M5 9.4C2.6 8 1 5.2 1.3 1.2 3.4 1.8 5 4.6 5 9.4ZM5 9.4C7.4 8 9 5.2 8.7 1.2 6.6 1.8 5 4.6 5 9.4Z\" transform=\"translate(0 30)\"/><path class=\"st same\" d=\"M5 9.4C2.6 8 1 5.2 1.3 1.2 3.4 1.8 5 4.6 5 9.4ZM5 9.4C7.4 8 9 5.2 8.7 1.2 6.6 1.8 5 4.6 5 9.4Z\" transform=\"translate(0 40)\"/><path class=\"st same\" d=\"M5 9.4C2.6 8 1 5.2 1.3 1.2 3.4 1.8 5 4.6 5 9.4ZM5 9.4C7.4 8 9 5.2 8.7 1.2 6.6 1.8 5 4.6 5 9.4Z\" transform=\"translate(0 50)\"/></g><g><path class=\"st\" d=\"M5 9.4C2.6 8 1 5.2 1.3 1.2 3.4 1.8 5 4.6 5 9.4ZM5 9.4C7.4 8 9 5.2 8.7 1.2 6.6 1.8 5 4.6 5 9.4Z\" transform=\"translate(10 0)\"/><path class=\"st\" d=\"M5 9.4C2.6 8 1 5.2 1.3 1.2 3.4 1.8 5 4.6 5 9.4ZM5 9.4C7.4 8 9 5.2 8.7 1.2 6.6 1.8 5 4.6 5 9.4Z\" transform=\"translate(10 10)\"/><path class=\"st\" d=\"M5 9.4C2.6 8 1 5.2 1.3 1.2 3.4 1.8 5 4.6 5 9.4ZM5 9.4C7.4 8 9 5.2 8.7 1.2 6.6 1.8 5 4.6 5 9.4Z\" transform=\"translate(10 20)\"/><path class=\"st same\" d=\"M5 9.4C2.6 8 1 5.2 1.3 1.2 3.4 1.8 5 4.6 5 9.4ZM5 9.4C7.4 8 9 5.2 8.7 1.2 6.6 1.8 5 4.6 5 9.4Z\" transform=\"translate(10 30)\"/><path class=\"st same\" d=\"M5 9.4C2.6 8 1 5.2 1.3 1.2 3.4 1.8 5 4.6 5 9.4ZM5 9.4C7.4 8 9 5.2 8.7 1.2 6.6 1.8 5 4.6 5 9.4Z\" transform=\"translate(10 40)\"/><path class=\"st same\" d=\"M5 9.4C2.6 8 1 5.2 1.3 1.2 3.4 1.8 5 4.6 5 9.4ZM5 9.4C7.4 8 9 5.2 8.7 1.2 6.6 1.8 5 4.6 5 9.4Z\" transform=\"translate(10 50)\"/></g><g><path class=\"st\" d=\"M5 9.4C2.6 8 1 5.2 1.3 1.2 3.4 1.8 5 4.6 5 9.4ZM5 9.4C7.4 8 9 5.2 8.7 1.2 6.6 1.8 5 4.6 5 9.4Z\" transform=\"translate(20 0)\"/><path class=\"st up\" d=\"M5 9.4C2.6 8 1 5.2 1.3 1.2 3.4 1.8 5 4.6 5 9.4ZM5 9.4C7.4 8 9 5.2 8.7 1.2 6.6 1.8 5 4.6 5 9.4Z\" transform=\"translate(20 10)\"/><path class=\"st up\" d=\"M5 9.4C2.6 8 1 5.2 1.3 1.2 3.4 1.8 5 4.6 5 9.4ZM5 9.4C7.4 8 9 5.2 8.7 1.2 6.6 1.8 5 4.6 5 9.4Z\" transform=\"translate(20 20)\"/><path class=\"st up\" d=\"M5 9.4C2.6 8 1 5.2 1.3 1.2 3.4 1.8 5 4.6 5 9.4ZM5 9.4C7.4 8 9 5.2 8.7 1.2 6.6 1.8 5 4.6 5 9.4Z\" transform=\"translate(20 30)\"/><path class=\"st up\" d=\"M5 9.4C2.6 8 1 5.2 1.3 1.2 3.4 1.8 5 4.6 5 9.4ZM5 9.4C7.4 8 9 5.2 8.7 1.2 6.6 1.8 5 4.6 5 9.4Z\" transform=\"translate(20 40)\"/><path class=\"st up\" d=\"M5 9.4C2.6 8 1 5.2 1.3 1.2 3.4 1.8 5 4.6 5 9.4ZM5 9.4C7.4 8 9 5.2 8.7 1.2 6.6 1.8 5 4.6 5 9.4Z\" transform=\"translate(20 50)\"/></g><g><path class=\"st\" d=\"M5 9.4C2.6 8 1 5.2 1.3 1.2 3.4 1.8 5 4.6 5 9.4ZM5 9.4C7.4 8 9 5.2 8.7 1.2 6.6 1.8 5 4.6 5 9.4Z\" transform=\"translate(30 0)\"/><path class=\"st\" d=\"M5 9.4C2.6 8 1 5.2 1.3 1.2 3.4 1.8 5 4.6 5 9.4ZM5 9.4C7.4 8 9 5.2 8.7 1.2 6.6 1.8 5 4.6 5 9.4Z\" transform=\"translate(30 10)\"/><path class=\"st\" d=\"M5 9.4C2.6 8 1 5.2 1.3 1.2 3.4 1.8 5 4.6 5 9.4ZM5 9.4C7.4 8 9 5.2 8.7 1.2 6.6 1.8 5 4.6 5 9.4Z\" transform=\"translate(30 20)\"/><path class=\"st down\" d=\"M5 9.4C2.6 8 1 5.2 1.3 1.2 3.4 1.8 5 4.6 5 9.4ZM5 9.4C7.4 8 9 5.2 8.7 1.2 6.6 1.8 5 4.6 5 9.4Z\" transform=\"translate(30 30)\"/><path class=\"st down\" d=\"M5 9.4C2.6 8 1 5.2 1.3 1.2 3.4 1.8 5 4.6 5 9.4ZM5 9.4C7.4 8 9 5.2 8.7 1.2 6.6 1.8 5 4.6 5 9.4Z\" transform=\"translate(30 40)\"/><path class=\"st down\" d=\"M5 9.4C2.6 8 1 5.2 1.3 1.2 3.4 1.8 5 4.6 5 9.4ZM5 9.4C7.4 8 9 5.2 8.7 1.2 6.6 1.8 5 4.6 5 9.4Z\" transform=\"translate(30 50)\"/></g><g><path class=\"st\" d=\"M5 9.4C2.6 8 1 5.2 1.3 1.2 3.4 1.8 5 4.6 5 9.4ZM5 9.4C7.4 8 9 5.2 8.7 1.2 6.6 1.8 5 4.6 5 9.4Z\" transform=\"translate(40 0)\"/><path class=\"st\" d=\"M5 9.4C2.6 8 1 5.2 1.3 1.2 3.4 1.8 5 4.6 5 9.4ZM5 9.4C7.4 8 9 5.2 8.7 1.2 6.6 1.8 5 4.6 5 9.4Z\" transform=\"translate(40 10)\"/><path class=\"st\" d=\"M5 9.4C2.6 8 1 5.2 1.3 1.2 3.4 1.8 5 4.6 5 9.4ZM5 9.4C7.4 8 9 5.2 8.7 1.2 6.6 1.8 5 4.6 5 9.4Z\" transform=\"translate(40 20)\"/><path class=\"st same\" d=\"M5 9.4C2.6 8 1 5.2 1.3 1.2 3.4 1.8 5 4.6 5 9.4ZM5 9.4C7.4 8 9 5.2 8.7 1.2 6.6 1.8 5 4.6 5 9.4Z\" transform=\"translate(40 30)\"/><path class=\"st same\" d=\"M5 9.4C2.6 8 1 5.2 1.3 1.2 3.4 1.8 5 4.6 5 9.4ZM5 9.4C7.4 8 9 5.2 8.7 1.2 6.6 1.8 5 4.6 5 9.4Z\" transform=\"translate(40 40)\"/><path class=\"st same\" d=\"M5 9.4C2.6 8 1 5.2 1.3 1.2 3.4 1.8 5 4.6 5 9.4ZM5 9.4C7.4 8 9 5.2 8.7 1.2 6.6 1.8 5 4.6 5 9.4Z\" transform=\"translate(40 50)\"/></g><g><path class=\"st\" d=\"M5 9.4C2.6 8 1 5.2 1.3 1.2 3.4 1.8 5 4.6 5 9.4ZM5 9.4C7.4 8 9 5.2 8.7 1.2 6.6 1.8 5 4.6 5 9.4Z\" transform=\"translate(50 0)\"/><path class=\"st\" d=\"M5 9.4C2.6 8 1 5.2 1.3 1.2 3.4 1.8 5 4.6 5 9.4ZM5 9.4C7.4 8 9 5.2 8.7 1.2 6.6 1.8 5 4.6 5 9.4Z\" transform=\"translate(50 10)\"/><path class=\"st\" d=\"M5 9.4C2.6 8 1 5.2 1.3 1.2 3.4 1.8 5 4.6 5 9.4ZM5 9.4C7.4 8 9 5.2 8.7 1.2 6.6 1.8 5 4.6 5 9.4Z\" transform=\"translate(50 20)\"/><path class=\"st\" d=\"M5 9.4C2.6 8 1 5.2 1.3 1.2 3.4 1.8 5 4.6 5 9.4ZM5 9.4C7.4 8 9 5.2 8.7 1.2 6.6 1.8 5 4.6 5 9.4Z\" transform=\"translate(50 30)\"/><path class=\"st down\" d=\"M5 9.4C2.6 8 1 5.2 1.3 1.2 3.4 1.8 5 4.6 5 9.4ZM5 9.4C7.4 8 9 5.2 8.7 1.2 6.6 1.8 5 4.6 5 9.4Z\" transform=\"translate(50 40)\"/><path class=\"st down\" d=\"M5 9.4C2.6 8 1 5.2 1.3 1.2 3.4 1.8 5 4.6 5 9.4ZM5 9.4C7.4 8 9 5.2 8.7 1.2 6.6 1.8 5 4.6 5 9.4Z\" transform=\"translate(50 50)\"/></g></svg><div class=\"ds-knit-axis\"><span>3 Nov</span><span>21 Nov</span></div><div class=\"ds-knit-legend\"><span><i style=\"background:var(--moss, #a6d27f)\"></i>price fell</span><span><i style=\"background:var(--berry, #ef8fa0)\"></i>price rose</span><span><i style=\"background:var(--yarn-2, #b7b0a0)\"></i>no change</span></div><figcaption>6 prices since 3 Nov. Lowest Rs. 1,199, highest Rs. 1,799.</figcaption></figure>",
+      "css": ".ds-knit{margin:0;display:grid;gap:10px;max-width:224px;color:var(--yarn-2, #b7b0a0);font:12px var(--body, Figtree, sans-serif);} .ds-knit-svg{display:block;width:100%;height:auto;background:var(--field, #10152a);border-radius:var(--r-md, 14px);padding:10px;box-sizing:border-box;} .ds-knit-svg .st{fill:var(--wool-3, #2a3459);} .ds-knit-svg .st.same{fill:var(--yarn-2, #b7b0a0);} .ds-knit-svg .st.down{fill:var(--moss, #a6d27f);} .ds-knit-svg .st.up{fill:var(--berry, #ef8fa0);} .ds-knit-svg g{animation:ds-stitch .5s cubic-bezier(.16,1,.3,1) backwards;} .ds-knit-svg g:nth-child(2){animation-delay:45ms;} .ds-knit-svg g:nth-child(3){animation-delay:90ms;} .ds-knit-svg g:nth-child(4){animation-delay:135ms;} .ds-knit-svg g:nth-child(5){animation-delay:180ms;} .ds-knit-svg g:nth-child(6){animation-delay:225ms;} @keyframes ds-stitch{from{opacity:0;transform:translateY(6px);}} .ds-knit-axis{display:flex;justify-content:space-between;font-variant-numeric:tabular-nums;} .ds-knit-legend{display:flex;flex-wrap:wrap;gap:6px 14px;} .ds-knit-legend span{display:inline-flex;align-items:center;gap:5px;} .ds-knit-legend i{width:9px;height:9px;border-radius:2px;} .ds-knit figcaption{font-size:13px;} @media (prefers-reduced-motion: reduce){.ds-knit-svg g{animation:none;}}"
+    }
+  ],
+  "narrative": {
+    "northStar": "Nani's Cardigan",
+    "overview": "The rack is a hand-knit navy cardigan you pull on at night. The ground is navy wool in three or four tonal plies; all text is oatmeal yarn; the only bright thing is a mustard button, and it appears only where a thumb can press. The logo is a horn cardigan button (four holes, stitched cross) and the signature is Fair Isle colourwork: price history is literally knitted, one stitch column per daily check, moss stitches where the price fell and berry where it rose. The same stitch knits a peerie band across the top of the save strip and a swatch on the passcode screen. Edges that meet other surfaces (under the bar, the top of the phone sheet) finish in a ribbed cuff stripe.\n\nThe density is cosy, not sparse: a 2-column photo-first grid on the phone, generous rounded panels, 44px touch targets everywhere, and a 15px body that is comfortable to read in bed. Night is the default because the owner scrolls in the dark; Day is not a white store app but a pale heather-blue jumper with navy as the ink. The world refuses the cold white store-app grid and the generic soft-card app; earlier kraft hang-tag and denim-patch looks are not part of this system.",
+    "keyCharacteristics": [
+      "Navy wool ground in tonal plies; depth comes from ply, not from glass or heavy shadow.",
+      "Oatmeal yarn text in three strengths; never pure white, never pure black.",
+      "Mustard reserved for pressable primary actions; berry for sale, price rises and delete; moss for price drops and saved.",
+      "Bricolage Grotesque for the wordmark, headings and every price; Figtree for the UI; both self-hosted so the installed app keeps its type offline.",
+      "Large soft radii (11 / 14 / 18px) and pill controls; identical 3:4 photo frames, tinted from the item's saved colour when there is no photo.",
+      "Ribbed-cuff stripe edges and a single knitted stitch shape reused for the chart, the peerie band and the passcode swatch."
+    ],
+    "rules": [
+      {
+        "name": "The Mustard Button Rule",
+        "body": "Mustard fills only things that can be pressed, dragged or dropped onto. It is never a heading colour, a badge, a price or decoration. The two documented exceptions are text-interaction affordances: the text selection highlight (mustard with `on-mustard` text) and the input caret. Nothing else earns it.",
+        "section": "colors"
+      },
+      {
+        "name": "The Yarn Says Which Way Rule",
+        "body": "Moss means the price went down, berry means it went up or is on sale (or something will be destroyed). Every colour signal is doubled by shape: a down chevron on drops, a struck-through MRP beside the sale price, a check on bought items.",
+        "section": "colors"
+      },
+      {
+        "name": "The Heather, Not White Rule",
+        "body": "Day is a pale heather-blue jumper (`day-wool`), and the lightest surface in the system is the deep field (`day-field`). No surface is pure white and no text is pure black in either theme.",
+        "section": "colors"
+      },
+      {
+        "name": "The Price Is Bricolage Rule",
+        "body": "Every price is set in Bricolage, right after the Rs. sign, with tabular figures. MRP and percent-off sit beside it in Figtree at 12.5px, the MRP struck through with a 1.5px line.",
+        "section": "typography"
+      },
+      {
+        "name": "The No Shouting Rule",
+        "body": "Nothing is uppercase and nothing is letter-spaced open except the passcode field (0.12em). Hierarchy comes from Bricolage weight and size, not caps.",
+        "section": "typography"
+      },
+      {
+        "name": "The Knit, Not Glass Rule",
+        "body": "Surfaces are flat wool plies at rest. A shadow means the thing is floating over the knit (sheet, flag, bar); a panel inside the page never gets one.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Identical Frame Rule",
+        "body": "Every product photo is a 3:4 frame with a 14px radius and `photo` ground, cropped with object-fit cover. Missing photos keep the frame, take the saved-colour tint when there is one, and show the store name in Bricolage, never an invented image.",
+        "section": "shapes"
+      },
+      {
+        "name": "The Ribbed Cuff Rule",
+        "body": "Where a surface meets the knit below it, it finishes in the 7px rib stripe, not a hairline or a hard drop shadow.",
+        "section": "shapes"
+      },
+      {
+        "name": "The One Stitch Rule",
+        "body": "Any knitted graphic uses the single stitch shape on the 10-unit grid. New charts or ornaments are new colourings of that stitch, never a different drawing style.",
+        "section": "components"
+      }
+    ],
+    "dos": [
+      "Do keep mustard (`mustard`) on pressable, draggable or droppable controls only (plus the text selection and caret), and give each view at most one or two mustard buttons.",
+      "Do pair every colour signal with a shape: down chevron for drops, struck MRP for sale, check for bought.",
+      "Do set every price in Bricolage with tabular figures, right after \"Rs.\", right-aligned where prices stack.",
+      "Do use 3:4 frames with the 14px radius for every product photo, and the tinted store-name placeholder when there is no photo.",
+      "Do build depth with wool plies (`wool` → `wool-2`, fields at `field`) and 1.5px `wool-3` borders.",
+      "Do finish surface edges that meet the knit with the 7px ribbed cuff.",
+      "Do keep every touch target at 44px or more (inputs, buttons including small ones, chips, selects, icon buttons, crop knobs via their 46px hit area).",
+      "Do derive shadow and mask colours from tokens (`color-mix` with `mustard` or `wool`) so they follow the theme.",
+      "Do change the Day theme in both places it is declared (the `data-theme=\"light\"` block and the `prefers-color-scheme: light` block), keeping them identical.",
+      "Do serve fonts from the app's own fonts folder and add any new font file to the service-worker cache.",
+      "Do respect reduced motion: every animation and transition collapses to near zero."
+    ],
+    "donts": [
+      "Don't use mustard for headings, badges, prices, borders at rest or decoration.",
+      "Don't use pure white surfaces or pure black text in either theme; Day is heather-blue, not a white store grid.",
+      "Don't add glass, blur or backdrop-filter, or shadows on in-page panels.",
+      "Don't set text in uppercase or open letter-spacing for hierarchy.",
+      "Don't use the 2 / 4 / 6px radii or the 11px type size outside the parts listed for them.",
+      "Don't draw knitted graphics with any shape other than the shared stitch.",
+      "Don't invent or generate product photos, or use the placeholder tints as UI colours.",
+      "Don't bring back the kraft hang-tag or denim-patch looks; they are not part of this system."
+    ]
+  }
+}

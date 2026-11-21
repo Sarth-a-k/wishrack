@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Wishrack, design B</title>
+<!-- Design B, made with the baseline-ui skill: Tailwind defaults only (stone neutrals for warmth,
+     blue-600 as the single accent), default radius and shadow scale, system font, tabular numbers,
+     no animation, no gradients, fixed z-index scale (z-40 shade, z-50 panel). -->
+<script src="https://cdn.tailwindcss.com/3.4.17"></script>
+</head>
+<body class="bg-stone-50 text-stone-900 antialiased dark:bg-stone-950 dark:text-stone-100">
+<div class="bg-stone-900 px-4 py-1.5 text-center text-xs text-stone-100 dark:bg-stone-100 dark:text-stone-900">Design B: baseline-ui skill, sample screen</div>
+
+<header class="sticky top-0 z-10 border-b border-stone-200 bg-white/95 dark:border-stone-800 dark:bg-stone-900/95">
+  <div class="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3">
+    <div class="flex items-center gap-2 text-lg font-semibold">
+      <span class="grid size-8 place-items-center rounded-lg bg-blue-600 text-white">
+        <svg viewBox="0 0 24 24" class="size-5" fill="currentColor" aria-hidden="true"><path d="M7 4h10l-1 4h3l-2 12H7L5 8h3L7 4Zm2.2 4h5.6l.5-2H8.7l.5 2Z"/></svg>
+      </span>
+      Wishrack
+    </div>
+    <div class="text-right text-sm leading-tight text-stone-500 tabular-nums dark:text-stone-400">
+      <span class="font-semibold text-stone-900 dark:text-stone-100">6</span> to buy<br>
+      worth <span class="font-semibold text-stone-900 dark:text-stone-100">Rs. 11,494.00</span>
+    </div>
+  </div>
+</header>
+
+<section class="mx-auto max-w-6xl px-4 pt-5">
+  <div class="rounded-xl border border-stone-200 bg-white p-4 shadow-sm dark:border-stone-800 dark:bg-stone-900">
+    <h2 class="text-balance text-base font-semibold">Save something you saw</h2>
+    <p class="mt-1 text-pretty text-sm text-stone-500 dark:text-stone-400">Share a screenshot or link to Wishrack, paste one here, or pick screenshots from your gallery.</p>
+    <div class="mt-3 flex flex-wrap gap-2">
+      <input class="h-10 min-w-0 flex-1 basis-60 rounded-lg border border-stone-300 bg-white px-3 text-base dark:border-stone-700 dark:bg-stone-950" placeholder="Paste a product link">
+      <button class="h-10 rounded-lg bg-blue-600 px-4 text-sm font-medium text-white shadow-sm">Save link</button>
+      <button class="h-10 rounded-lg border border-stone-300 bg-white px-4 text-sm font-medium dark:border-stone-700 dark:bg-stone-900">Choose screenshots</button>
+    </div>
+  </div>
+</section>
+
+<div class="mx-auto max-w-6xl px-4">
+  <div class="flex flex-wrap items-center justify-between gap-3 py-5 text-sm">
+    <span class="text-stone-600 dark:text-stone-400">7 items</span>
+    <div class="flex gap-2">
+      <select class="h-9 rounded-lg border border-stone-300 bg-white px-2 text-sm dark:border-stone-700 dark:bg-stone-900"><option>All stores</option></select>
+      <select class="h-9 rounded-lg border border-stone-300 bg-white px-2 text-sm dark:border-stone-700 dark:bg-stone-900"><option>Newest first</option></select>
+    </div>
+  </div>
+  <main id="grid" class="grid grid-cols-2 gap-3 pb-16 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5"></main>
+</div>
+
+<div id="sheetLayer" hidden>
+  <div class="fixed inset-0 z-40 bg-stone-900/40"></div>
+  <aside role="dialog" aria-modal="true" aria-labelledby="sTitle" class="fixed inset-x-0 bottom-0 z-50 max-h-[88dvh] overflow-y-auto rounded-t-2xl bg-white p-5 shadow-xl sm:inset-y-0 sm:left-auto sm:right-0 sm:max-h-none sm:w-[440px] sm:rounded-none dark:bg-stone-900" style="padding-bottom:max(1.25rem, env(safe-area-inset-bottom))">
+    <div class="flex items-center justify-between">
+      <h3 id="sTitle" class="text-balance text-lg font-semibold">Black Faded Loose Fit Pants</h3>
+      <button aria-label="Close" class="grid size-9 place-items-center rounded-lg text-stone-500 hover:bg-stone-100 dark:hover:bg-stone-800">
+        <svg viewBox="0 0 24 24" class="size-5" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+      </button>
+    </div>
+    <div class="mt-4 grid grid-cols-[120px_1fr] gap-4">
+      <div id="sheetPhoto" class="aspect-[3/4] overflow-hidden rounded-lg bg-stone-100 dark:bg-stone-800"></div>
+      <div>
+        <p class="text-sm text-stone-500 dark:text-stone-400">Bonkers Corner</p>
+        <p class="mt-1 text-xl font-semibold tabular-nums">Rs. 1,299.00</p>
+        <p class="text-sm text-stone-500 tabular-nums">MRP <s>Rs. 1,799.00</s></p>
+        <p class="mt-1 text-sm font-medium text-emerald-700 tabular-nums dark:text-emerald-400">Dropped from Rs. 1,499.00</p>
+        <div class="mt-3 flex flex-wrap gap-2">
+          <button class="h-9 rounded-lg bg-blue-600 px-3 text-sm font-medium text-white shadow-sm">Go to store</button>
+          <button class="h-9 rounded-lg border border-stone-300 px-3 text-sm font-medium dark:border-stone-700">Replace photo</button>
+        </div>
+      </div>
+    </div>
+    <div class="mt-5 border-t border-stone-200 pt-4 dark:border-stone-800">
+      <h4 class="text-sm font-semibold">Price history</h4>
+      <ul class="mt-2 divide-y divide-stone-200 text-sm tabular-nums dark:divide-stone-800">
+        <li class="flex justify-between py-2"><span>Today</span><span class="font-medium text-emerald-700 dark:text-emerald-400">Rs. 1,299.00</span></li>
+        <li class="flex justify-between py-2"><span>21 Nov</span><span class="font-medium">Rs. 1,499.00</span></li>
+      </ul>
+      <button class="mt-2 h-9 rounded-lg border border-stone-300 px-3 text-sm font-medium dark:border-stone-700">Check price now</button>
+    </div>
+    <div class="mt-5 border-t border-stone-200 pt-4 dark:border-stone-800">
+      <h4 class="text-sm font-semibold">Search other stores</h4>
+      <div class="mt-2 flex flex-wrap gap-2 text-sm">
+        <a class="rounded-full border border-stone-300 px-3 py-1.5 dark:border-stone-700">Myntra</a><a class="rounded-full border border-stone-300 px-3 py-1.5 dark:border-stone-700">Amazon</a><a class="rounded-full border border-stone-300 px-3 py-1.5 dark:border-stone-700">Flipkart</a><a class="rounded-full border border-stone-300 px-3 py-1.5 dark:border-stone-700">Ajio</a><a class="rounded-full border border-stone-300 px-3 py-1.5 dark:border-stone-700">Google Shopping</a>
+      </div>
+    </div>
+    <div class="mt-5 border-t border-stone-200 pt-4 dark:border-stone-800">
+      <button class="h-9 rounded-lg px-3 text-sm font-medium text-red-600 hover:bg-red-50 dark:hover:bg-red-950">Delete item</button>
+    </div>
+  </aside>
+</div>
+
+<script src="data.js"></script>
+<script>
+document.getElementById("grid").innerHTML = ITEMS.map((it) => {
+  const sale = it.mrp && it.mrp > it.price;
+  const badge = it.bought ? `<span class="absolute left-2 top-2 rounded-full bg-stone-900/80 px-2 py-0.5 text-xs font-medium text-white">Bought</span>`
+    : it.prev ? `<span class="absolute left-2 top-2 rounded-full bg-emerald-600 px-2 py-0.5 text-xs font-medium text-white tabular-nums">Down Rs. ${it.prev - it.price}</span>`
+    : sale ? `<span class="absolute left-2 top-2 rounded-full bg-white px-2 py-0.5 text-xs font-medium text-red-600 shadow-sm tabular-nums">${Math.round((1 - it.price / it.mrp) * 100)}% off</span>` : "";
+  return `<article class="overflow-hidden rounded-xl border border-stone-200 bg-white shadow-sm dark:border-stone-800 dark:bg-stone-900 ${it.bought ? "opacity-60" : ""}">
+    <div class="relative aspect-[3/4] bg-stone-100 dark:bg-stone-800">${garment(it.kind, it.colour)}${badge}</div>
+    <div class="p-3">
+      <p class="truncate text-xs text-stone-500 dark:text-stone-400">${it.store}</p>
+      <p class="mt-0.5 line-clamp-2 text-pretty text-sm">${it.title}</p>
+      <p class="mt-1 flex flex-wrap gap-x-1.5 text-sm font-semibold tabular-nums ${sale ? "text-red-600" : ""}"><span class="whitespace-nowrap">${money(it.price)}</span>${sale ? `<span class="whitespace-nowrap font-normal text-stone-400 line-through">${money(it.mrp)}</span>` : ""}</p>
+      ${it.prev ? `<p class="text-xs font-medium text-emerald-700 tabular-nums dark:text-emerald-400">Dropped from ${money(it.prev)}</p>` : ""}
+    </div>
+  </article>`;
+}).join("");
+document.querySelectorAll("#grid svg").forEach((s) => s.setAttribute("class", "h-full w-full"));
+document.getElementById("sheetPhoto").innerHTML = garment("pants", "#2b2b2e");
+document.querySelector("#sheetPhoto svg").setAttribute("class", "h-full w-full");
+if (location.hash === "#sheet") document.getElementById("sheetLayer").hidden = false;
+</script>
+</body>
+</html>
