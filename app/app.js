@@ -61,6 +61,8 @@
     { name: "Flipkart", url: (q) => "https://www.flipkart.com/search?q=" + encodeURIComponent(q) },
     { name: "Ajio", url: (q) => "https://www.ajio.com/search/?text=" + encodeURIComponent(q) },
     { name: "Google Shopping", url: (q) => "https://www.google.com/search?tbm=shop&q=" + encodeURIComponent(q) },
+    // BuyHatke compares prices across Indian stores; this opens its own search page in the browser.
+    { name: "BuyHatke", url: (q) => "https://buyhatke.com/search?product=" + encodeURIComponent(q) },
   ];
   const storeLink = (it) => it.url || "https://www.google.com/search?q=" + encodeURIComponent(query(it) + " " + (it.store || ""));
   const imgSrc = (it) => it.imageId ? "/api/images/" + it.imageId : "";
